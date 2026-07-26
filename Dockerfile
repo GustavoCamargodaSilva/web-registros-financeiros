@@ -6,6 +6,10 @@ COPY . .
 RUN npm run build
 
 FROM nginx:1.27-alpine
+# Já rodamos como USER nginx; a diretiva `user` do conf base falha sem root.
+RUN sed -i 's/^user /#user /' /etc/nginx/nginx.conf \
+    && sed -i 's|pid .*|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf
+
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
@@ -13,8 +17,8 @@ RUN chown -R nginx:nginx /usr/share/nginx/html \
     && chown -R nginx:nginx /var/cache/nginx \
     && chown -R nginx:nginx /var/log/nginx \
     && chown -R nginx:nginx /etc/nginx/conf.d \
-    && touch /var/run/nginx.pid \
-    && chown nginx:nginx /var/run/nginx.pid
+    && touch /tmp/nginx.pid \
+    && chown nginx:nginx /tmp/nginx.pid
 
 USER nginx
 EXPOSE 8080
