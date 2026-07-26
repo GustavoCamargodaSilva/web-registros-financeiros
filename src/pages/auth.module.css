@@ -1,0 +1,52 @@
+.authPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(11, 92, 173, 0.18), transparent 55%),
+    var(--color-background);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.form {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.footer {
+  margin-top: var(--spacing-md);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.link {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.error {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.message {
+  margin: 0 0 var(--spacing-md);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.actions {
+  display: grid;
+  gap: var(--spacing-sm);
+}

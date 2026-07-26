@@ -1,0 +1,49 @@
+:root {
+  /* Brand / primary */
+  --color-brand: #0b5cad;
+  --color-brand-hover: #094a8f;
+  --color-primary: #0b5cad;
+  --color-primary-hover: #094a8f;
+
+  /* Money semantics */
+  --color-income: #28a745;
+  --color-expense: #e74c3c;
+
+  /* Feedback */
+  --color-success: #28a745;
+  --color-warning: #f0ad4e;
+  --color-danger: #e74c3c;
+  --color-secondary: #00a896;
+
+  /* Surfaces */
+  --color-background: #eef1f6;
+  --color-sidebar: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-border: #e1e6ee;
+  --color-text: #2d3748;
+  --color-text-muted: #718096;
+  --color-header-text: #ffffff;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 999px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Layout */
+  --header-height: 56px;
+  --sidebar-width: 248px;
+
+  /* Type — DM Sans loaded in global.css */
+  --font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+}

@@ -1,0 +1,31 @@
+.container {
+  position: fixed;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  z-index: 1000;
+}
+
+.toast {
+  min-width: 280px;
+  max-width: 420px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.success {
+  background: #e8f9f0;
+  color: #1a7f4b;
+  border: 1px solid #b8ebd0;
+}
+
+.error {
+  background: #fdeeee;
+  color: #b42318;
+  border: 1px solid #f5c2c2;
+}
