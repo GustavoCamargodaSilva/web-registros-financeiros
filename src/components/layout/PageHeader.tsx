@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { CompetenciaSelector } from '../ui/CompetenciaSelector'
 import styles from './PageHeader.module.css'
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { ApiError } from '../api/client'
 import { ambienteStorage } from '../api/ambienteStorage'
 import { convitesApi } from '../api/convites.api'
