@@ -7,4 +7,6 @@ const BASE = '/api/v1/ambientes'
 export const ambientesApi = {
   listar: () => apiRequest<Ambiente[]>(BASE),
   listarMembrosAtivo: () => apiRequest<MembroAmbiente[]>(`${BASE}/ativo/membros`),
+  removerMembro: (usuarioId: number) =>
+    apiRequest<void>(`${BASE}/ativo/membros/${usuarioId}`, { method: 'DELETE' }),
 }

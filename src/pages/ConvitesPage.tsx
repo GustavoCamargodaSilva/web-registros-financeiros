@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { ambienteStorage } from '../api/ambienteStorage'
 import { ambientesApi } from '../api/ambientes.api'
 import { convitesApi } from '../api/convites.api'
+import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { DataTable } from '../components/ui/DataTable'
 import { Input } from '../components/ui/Input'
+import { Modal } from '../components/ui/Modal'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import type { Ambiente } from '../types/ambiente.types'
 import type { MembroAmbiente } from '../types/membro.types'
@@ -47,6 +49,8 @@ export function ConvitesPage() {
   const [loading, setLoading] = useState(false)
   const [ambienteAtivo, setAmbienteAtivo] = useState<Ambiente | null>(null)
   const [membros, setMembros] = useState<MembroAmbiente[]>([])
+  const [removeTarget, setRemoveTarget] = useState<MembroAmbiente | null>(null)
+  const [removing, setRemoving] = useState(false)
 
   const isDono = ambienteAtivo?.papel === 'DONO'
 
@@ -108,6 +112,24 @@ export function ConvitesPage() {
     }
   }
 
+  const confirmRemove = async () => {
+    if (!removeTarget) {
+      return
+    }
+
+    setRemoving(true)
+    try {
+      await ambientesApi.removerMembro(removeTarget.usuarioId)
+      showSuccess(`Acesso de ${primeiroNome(removeTarget.nome)} removido`)
+      setRemoveTarget(null)
+      await loadData()
+    } catch (error) {
+      handleError(error)
+    } finally {
+      setRemoving(false)
+    }
+  }
+
   return (
     <div className={styles.stack}>
       <Card title="Convidar para o ambiente">
@@ -160,7 +182,7 @@ export function ConvitesPage() {
             {
               key: 'nome',
               header: 'Nome',
-              width: '50%',
+              width: isDono ? '40%' : '50%',
               truncate: true,
               title: (row) => row.nome,
               render: (row) => primeiroNome(row.nome),
@@ -168,12 +190,59 @@ export function ConvitesPage() {
             {
               key: 'papel',
               header: 'Papel',
-              width: '50%',
+              width: isDono ? '35%' : '50%',
               render: (row) => labelPapel(row.papel),
             },
+            ...(isDono
+              ? [
+                  {
+                    key: 'actions',
+                    header: 'Ações',
+                    width: '25%',
+                    render: (row: MembroAmbiente) =>
+                      row.papel === 'EDITOR' || row.papel === 'LEITOR' ? (
+                        <div className={styles.tableActions}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className={styles.actionDanger}
+                            title="Remover acesso"
+                            aria-label={`Remover acesso de ${primeiroNome(row.nome)}`}
+                            onClick={() => setRemoveTarget(row)}
+                          >
+                            <IconTrash />
+                          </Button>
+                        </div>
+                      ) : null,
+                  },
+                ]
+              : []),
           ]}
         />
       </Card>
+
+      <Modal
+        open={Boolean(removeTarget)}
+        title="Remover acesso"
+        message={
+          removeTarget
+            ? `Deseja remover o acesso de ${primeiroNome(removeTarget.nome)} a este ambiente? As despesas e receitas já lançadas permanecerão.`
+            : null
+        }
+        confirmLabel={removing ? 'Removendo…' : 'Remover acesso'}
+        variant="danger"
+        onCancel={() => {
+          if (!removing) {
+            setRemoveTarget(null)
+          }
+        }}
+        onConfirm={() => {
+          if (!removing) {
+            void confirmRemove()
+          }
+        }}
+      />
     </div>
   )
 }
