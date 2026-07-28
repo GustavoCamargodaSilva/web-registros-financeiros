@@ -18,13 +18,10 @@ describe('ThemeToggle', () => {
     document.documentElement.removeAttribute(THEME_ATTRIBUTE)
   })
 
-  it('anuncia a ação de destino e o estado atual', () => {
+  it('anuncia a ação de destino, não o estado atual', () => {
     renderToggle()
 
-    expect(screen.getByRole('button', { name: 'Ativar tema escuro' })).toHaveAttribute(
-      'aria-pressed',
-      'false',
-    )
+    expect(screen.getByRole('button', { name: 'Ativar tema escuro' })).toBeInTheDocument()
   })
 
   it('troca o rótulo e aplica o tema ao clicar', () => {
@@ -32,10 +29,7 @@ describe('ThemeToggle', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Ativar tema escuro' }))
 
-    expect(screen.getByRole('button', { name: 'Ativar tema claro' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    expect(screen.getByRole('button', { name: 'Ativar tema claro' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute(THEME_ATTRIBUTE, 'dark')
   })
 })

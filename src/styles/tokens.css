@@ -196,10 +196,14 @@
   --color-header-overlay: rgba(255, 255, 255, 0.14);
   --color-header-border: rgba(255, 255, 255, 0.38);
 
-  --color-success-bg: rgba(74, 222, 128, 0.14);
+  /*
+   * Opacos de propósito: o toast flutua sobre o conteúdo sem um pai opaco, e um
+   * fundo translúcido deixaria o texto da página aparecer por trás.
+   */
+  --color-success-bg: #1a3228;
   --color-success-fg: #86efac;
   --color-success-border: rgba(74, 222, 128, 0.32);
-  --color-danger-bg: rgba(248, 113, 113, 0.14);
+  --color-danger-bg: #33242a;
   --color-danger-fg: #fca5a5;
   --color-danger-border: rgba(248, 113, 113, 0.32);
 
