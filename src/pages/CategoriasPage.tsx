@@ -6,12 +6,14 @@ import { Card } from '../components/ui/Card'
 import { DataTable } from '../components/ui/DataTable'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
+import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import type { Categoria } from '../types/categoria.types'
 import styles from './pages.module.css'
 
 export function CategoriasPage() {
   const { showSuccess, handleError } = useApiFeedback()
+  const { canWrite } = useAmbientePermissoes()
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [descricao, setDescricao] = useState('')
   const [error, setError] = useState('')
@@ -32,6 +34,9 @@ export function CategoriasPage() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
+    if (!canWrite) {
+      return
+    }
     const trimmed = descricao.trim()
 
     if (!trimmed) {
@@ -60,7 +65,7 @@ export function CategoriasPage() {
   }
 
   const confirmDelete = async () => {
-    if (!deleteTarget) {
+    if (!deleteTarget || !canWrite) {
       return
     }
 
@@ -74,53 +79,60 @@ export function CategoriasPage() {
     }
   }
 
+  const columns = [
+    { key: 'id', header: 'ID', render: (row: Categoria) => row.id },
+    { key: 'descricao', header: 'Descrição', render: (row: Categoria) => row.descricao },
+    ...(canWrite
+      ? [
+          {
+            key: 'actions',
+            header: 'Ações',
+            render: (row: Categoria) => (
+              <div className={styles.tableActions}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={styles.actionDanger}
+                  title="Excluir"
+                  aria-label="Excluir"
+                  onClick={() => setDeleteTarget(row)}
+                >
+                  <IconTrash />
+                </Button>
+              </div>
+            ),
+          },
+        ]
+      : []),
+  ]
+
   return (
     <div className={styles.stack}>
-      <Card title="Nova categoria">
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <Input
-            label="Descrição"
-            name="descricao"
-            value={descricao}
-            maxLength={30}
-            error={error}
-            onChange={(event) => setDescricao(event.target.value)}
-          />
-          <div className={styles.actions}>
-            <Button type="submit" disabled={loading}>
-              Cadastrar
-            </Button>
-          </div>
-        </form>
-      </Card>
+      {canWrite ? (
+        <Card title="Nova categoria">
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <Input
+              label="Descrição"
+              name="descricao"
+              value={descricao}
+              maxLength={30}
+              error={error}
+              onChange={(event) => setDescricao(event.target.value)}
+            />
+            <div className={styles.actions}>
+              <Button type="submit" disabled={loading}>
+                Cadastrar
+              </Button>
+            </div>
+          </form>
+        </Card>
+      ) : (
+        <p className={styles.editHint}>Seu papel neste ambiente é somente leitura.</p>
+      )}
 
       <Card title="Categorias cadastradas">
-        <DataTable
-          data={categorias}
-          columns={[
-            { key: 'id', header: 'ID', render: (row) => row.id },
-            { key: 'descricao', header: 'Descrição', render: (row) => row.descricao },
-            {
-              key: 'actions',
-              header: 'Ações',
-              render: (row) => (
-                <div className={styles.tableActions}>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={styles.actionDanger}
-                    title="Excluir"
-                    aria-label="Excluir"
-                    onClick={() => setDeleteTarget(row)}
-                  >
-                    <IconTrash />
-                  </Button>
-                </div>
-              ),
-            },
-          ]}
-        />
+        <DataTable data={categorias} columns={columns} />
       </Card>
 
       <Modal

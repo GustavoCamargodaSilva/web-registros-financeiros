@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
+import { consumeAuthMessage } from '../api/authMessage'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
@@ -13,11 +14,20 @@ export function LoginPage() {
   const [searchParams] = useSearchParams()
   const returnUrl = getSafeReturnUrl(searchParams.get('returnUrl'))
   const { login, isAuthenticated } = useAuth()
-  const { handleError } = useApiFeedback()
+  const { showError, handleError } = useApiFeedback()
   const [loginField, setLoginField] = useState('')
   const [senha, setSenha] = useState('')
   const [errors, setErrors] = useState<{ login?: string; senha?: string }>({})
   const [loading, setLoading] = useState(false)
+  const [infoMessage, setInfoMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    const message = consumeAuthMessage()
+    if (message) {
+      setInfoMessage(message)
+      showError(message)
+    }
+  }, [showError])
 
   if (isAuthenticated) {
     return <Navigate to={returnUrl} replace />
@@ -36,11 +46,12 @@ export function LoginPage() {
     if (!validate()) return
 
     setLoading(true)
+    setInfoMessage(null)
     try {
       await login({ login: loginField.trim(), senha })
       navigate(returnUrl)
     } catch (error) {
-      handleError(error)
+      handleError(error, 'Credenciais inválidas')
     } finally {
       setLoading(false)
     }
@@ -50,12 +61,14 @@ export function LoginPage() {
     <div className={styles.authPage}>
       <div className={styles.card}>
         <Card title="Entrar">
+          {infoMessage ? <p className={styles.message}>{infoMessage}</p> : null}
           <form className={styles.form} onSubmit={handleSubmit}>
             <Input
               label="E-mail ou telefone"
               name="login"
               value={loginField}
               error={errors.login}
+              autoComplete="username"
               onChange={(event) => setLoginField(event.target.value)}
             />
             <Input
@@ -64,6 +77,7 @@ export function LoginPage() {
               type="password"
               value={senha}
               error={errors.senha}
+              autoComplete="current-password"
               onChange={(event) => setSenha(event.target.value)}
             />
             <Button type="submit" disabled={loading}>

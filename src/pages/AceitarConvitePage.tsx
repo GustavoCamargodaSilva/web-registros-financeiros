@@ -50,7 +50,13 @@ export function AceitarConvitePage() {
         error instanceof ApiError
           ? (error.body.mensagem ?? error.message)
           : 'Não foi possível aceitar o convite.'
-      setErrorMessage(message)
+      const isExpiredOrInvalid =
+        /expir|inválid|invalido|cancelad|não encontrado|nao encontrado/i.test(message)
+      setErrorMessage(
+        isExpiredOrInvalid
+          ? `${message} Solicite um novo convite ao dono do ambiente.`
+          : message,
+      )
       setStatus('error')
     } finally {
       if (acceptGuard.inFlight === token) {

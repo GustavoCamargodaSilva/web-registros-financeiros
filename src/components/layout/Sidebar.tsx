@@ -1,5 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router'
+import { useAmbientePermissoes } from '../../hooks/useAmbientePermissoes'
 import {
   IconBank,
   IconCaret,
@@ -25,7 +26,7 @@ interface MenuGroup {
   children: MenuChild[]
 }
 
-const menuGroups: MenuGroup[] = [
+const baseMenuGroups: MenuGroup[] = [
   {
     id: 'despesas',
     label: 'Despesas',
@@ -59,8 +60,15 @@ function isPathInGroup(pathname: string, group: MenuGroup) {
 export function Sidebar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const { canManageMembros } = useAmbientePermissoes()
+
+  const menuGroups = useMemo(
+    () => baseMenuGroups.filter((group) => group.id !== 'usuario' || canManageMembros),
+    [canManageMembros],
+  )
+
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(menuGroups.map((group) => [group.id, isPathInGroup(pathname, group)])),
+    Object.fromEntries(baseMenuGroups.map((group) => [group.id, isPathInGroup(pathname, group)])),
   )
 
   useEffect(() => {
@@ -75,7 +83,7 @@ export function Sidebar() {
       }
       return changed ? next : current
     })
-  }, [pathname])
+  }, [pathname, menuGroups])
 
   function handleGroupClick(group: MenuGroup) {
     const isOpen = openGroups[group.id]

@@ -59,8 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registro = useCallback(async (data: RegistroRequest) => {
     await authApi.registro(data)
-    await login({ login: data.email, senha: data.senha })
-  }, [login])
+  }, [])
 
   const logout = useCallback(async () => {
     try {

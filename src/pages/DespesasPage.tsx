@@ -12,6 +12,7 @@ import { Modal } from '../components/ui/Modal'
 import { Select } from '../components/ui/Select'
 import { useAuth } from '../context/AuthContext'
 import { useCompetencia } from '../context/CompetenciaContext'
+import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import type { Categoria } from '../types/categoria.types'
 import type { Despesa, EscopoDespesa, TipoDespesa } from '../types/despesa.types'
@@ -87,6 +88,7 @@ function labelTipoDespesa(tipo: TipoDespesa): string {
 export function DespesasPage() {
   const { ano, mes } = useCompetencia()
   const { usuario } = useAuth()
+  const { canWrite } = useAmbientePermissoes()
   const { showSuccess, handleError } = useApiFeedback()
   const [despesas, setDespesas] = useState<Despesa[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
@@ -262,7 +264,7 @@ export function DespesasPage() {
   }
 
   const responsavelDesabilitado = filtroEscopo === 'CONJUNTA'
-  const formularioVisivel = formAberto || despesaEmEdicao != null
+  const formularioVisivel = canWrite && (formAberto || despesaEmEdicao != null)
   const editando = despesaEmEdicao != null
   const valorLabel =
     editando && despesaEmEdicao.tipoDespesa === 'VARIAVEL' ? 'Valor total' : 'Valor'
@@ -349,10 +351,13 @@ export function DespesasPage() {
               </div>
             ))}
           </div>
-          {!formularioVisivel ? (
+          {canWrite && !formularioVisivel ? (
             <Button type="button" variant="primary" onClick={abrirCadastro}>
               Cadastrar
             </Button>
+          ) : null}
+          {!canWrite ? (
+            <p className={styles.editHint}>Seu papel neste ambiente é somente leitura.</p>
           ) : null}
         </div>
       </Card>
@@ -605,48 +610,56 @@ export function DespesasPage() {
               width: '14%',
               render: (row) => <Badge paid={row.pago} />,
             },
-            {
-              key: 'actions',
-              header: 'Ações',
-              width: '132px',
-              render: (row) => (
-                <div className={styles.tableActions}>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={row.pago ? styles.actionPaid : undefined}
-                    title={row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'}
-                    aria-label={row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'}
-                    disabled={pagoLoadingId === row.id}
-                    onClick={() => void alternarPago(row)}
-                  >
-                    <IconCheck />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    title="Editar"
-                    aria-label="Editar"
-                    onClick={() => abrirEdicao(row)}
-                  >
-                    <IconEdit />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={styles.actionDanger}
-                    title="Excluir"
-                    aria-label="Excluir"
-                    onClick={() => setDeleteTarget(row)}
-                  >
-                    <IconTrash />
-                  </Button>
-                </div>
-              ),
-            },
+            ...(canWrite
+              ? [
+                  {
+                    key: 'actions',
+                    header: 'Ações',
+                    width: '132px',
+                    render: (row: Despesa) => (
+                      <div className={styles.tableActions}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className={row.pago ? styles.actionPaid : undefined}
+                          title={
+                            row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
+                          }
+                          aria-label={
+                            row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
+                          }
+                          disabled={pagoLoadingId === row.id}
+                          onClick={() => void alternarPago(row)}
+                        >
+                          <IconCheck />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          title="Editar"
+                          aria-label="Editar"
+                          onClick={() => abrirEdicao(row)}
+                        >
+                          <IconEdit />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className={styles.actionDanger}
+                          title="Excluir"
+                          aria-label="Excluir"
+                          onClick={() => setDeleteTarget(row)}
+                        >
+                          <IconTrash />
+                        </Button>
+                      </div>
+                    ),
+                  },
+                ]
+              : []),
           ]}
         />
       </Card>

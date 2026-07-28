@@ -1,4 +1,5 @@
 import { ambienteStorage } from './ambienteStorage'
+import { setAuthMessage } from './authMessage'
 import { setAccessToken, getAccessToken } from './tokenStorage'
 
 export class ApiError extends Error {
@@ -25,23 +26,56 @@ async function parseErrorBody(response: Response): Promise<Record<string, string
   }
 }
 
-async function refreshAccessToken(): Promise<boolean> {
-  try {
-    const response = await fetch('/api/v1/auth/refresh', {
-      method: 'POST',
-      credentials: 'include',
-    })
+let refreshInFlight: Promise<boolean> | null = null
 
-    if (!response.ok) {
-      return false
-    }
+function encerrarSessaoExpirada() {
+  setAccessToken(null)
+  ambienteStorage.clear()
+  setAuthMessage('Sua sessão expirou. Entre novamente.')
 
-    const data = (await response.json()) as { accessToken: string }
-    setAccessToken(data.accessToken)
-    return true
-  } catch {
-    return false
+  const path = window.location.pathname
+  if (path.startsWith('/login') || path.startsWith('/registro')) {
+    return
   }
+
+  const returnUrl = `${path}${window.location.search}`
+  const params = new URLSearchParams()
+  params.set('returnUrl', returnUrl)
+  window.location.assign(`/login?${params.toString()}`)
+}
+
+async function refreshAccessToken(): Promise<boolean> {
+  if (refreshInFlight) {
+    return refreshInFlight
+  }
+
+  refreshInFlight = (async () => {
+    try {
+      const response = await fetch('/api/v1/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      })
+
+      if (response.status === 401) {
+        encerrarSessaoExpirada()
+        return false
+      }
+
+      if (!response.ok) {
+        return false
+      }
+
+      const data = (await response.json()) as { accessToken: string }
+      setAccessToken(data.accessToken)
+      return true
+    } catch {
+      return false
+    } finally {
+      refreshInFlight = null
+    }
+  })()
+
+  return refreshInFlight
 }
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {

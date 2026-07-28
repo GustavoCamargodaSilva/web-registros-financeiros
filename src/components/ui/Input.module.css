@@ -47,3 +47,9 @@
   font-size: 12px;
   color: var(--color-danger);
 }
+
+.hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}

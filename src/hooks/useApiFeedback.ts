@@ -15,6 +15,17 @@ export function useApiFeedback() {
           showError(fieldMessages[0] ?? error.message)
           return error.body
         }
+
+        if (error.status === 403) {
+          showError(error.body.mensagem ?? 'Você não tem permissão para esta ação.')
+          return error.body
+        }
+
+        if (error.status === 502 || error.status === 503) {
+          showError('Serviço de e-mail temporariamente indisponível. Tente novamente em instantes.')
+          return error.body
+        }
+
         showError(error.body.mensagem ?? error.message)
         return error.body
       }

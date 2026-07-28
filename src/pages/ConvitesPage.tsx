@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Navigate } from 'react-router'
 import { ambienteStorage } from '../api/ambienteStorage'
 import { ambientesApi } from '../api/ambientes.api'
 import { convitesApi } from '../api/convites.api'
@@ -130,6 +131,10 @@ export function ConvitesPage() {
     }
   }
 
+  if (ambienteAtivo && !isDono) {
+    return <Navigate to="/despesas" replace />
+  }
+
   return (
     <div className={styles.stack}>
       <Card title="Convidar para o ambiente">
@@ -145,8 +150,8 @@ export function ConvitesPage() {
           </p>
         ) : (
           <p className={styles.editHint}>
-            O convidado receberá um e-mail com link para aceitar e passará a editar despesas e
-            receitas deste ambiente.
+            Envie um convite por vez (um e-mail). O convidado receberá um link para aceitar e
+            passará a editar despesas e receitas deste ambiente.
           </p>
         )}
 
@@ -158,6 +163,7 @@ export function ConvitesPage() {
             autoComplete="email"
             value={email}
             error={emailError}
+            hint="Apenas um destinatário por envio"
             disabled={!isDono || loading}
             onChange={(event) => {
               setEmail(event.target.value)

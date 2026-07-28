@@ -12,6 +12,7 @@ import { Modal } from '../components/ui/Modal'
 import { Select } from '../components/ui/Select'
 import { useAuth } from '../context/AuthContext'
 import { useCompetencia } from '../context/CompetenciaContext'
+import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import type { MembroAmbiente } from '../types/membro.types'
 import type { Pagador } from '../types/pagador.types'
@@ -53,6 +54,7 @@ function buildEditForm(receita: Receita): FormState {
 export function ReceitasPage() {
   const { ano, mes } = useCompetencia()
   const { usuario } = useAuth()
+  const { canWrite } = useAmbientePermissoes()
   const { showSuccess, handleError } = useApiFeedback()
   const [receitas, setReceitas] = useState<Receita[]>([])
   const [pagadores, setPagadores] = useState<Pagador[]>([])
@@ -107,7 +109,7 @@ export function ReceitasPage() {
   }, [formAberto, receitaEmEdicao, usuario?.id])
 
   const resumo = useMemo(() => calcularResumoReceitas(receitas), [receitas])
-  const formularioVisivel = formAberto || receitaEmEdicao != null
+  const formularioVisivel = canWrite && (formAberto || receitaEmEdicao != null)
   const editando = receitaEmEdicao != null
 
   const fecharFormulario = () => {
@@ -243,10 +245,13 @@ export function ReceitasPage() {
               </div>
             ))}
           </div>
-          {!formularioVisivel ? (
+          {canWrite && !formularioVisivel ? (
             <Button type="button" variant="primary" onClick={abrirCadastro}>
               Cadastrar
             </Button>
+          ) : null}
+          {!canWrite ? (
+            <p className={styles.editHint}>Seu papel neste ambiente é somente leitura.</p>
           ) : null}
         </div>
       </Card>
@@ -378,48 +383,52 @@ export function ReceitasPage() {
               width: '16%',
               render: (row) => <Badge paid={row.pago} />,
             },
-            {
-              key: 'actions',
-              header: 'Ações',
-              width: '132px',
-              render: (row) => (
-                <div className={styles.tableActions}>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={row.pago ? styles.actionPaid : undefined}
-                    title={row.pago ? 'Marcar como pendente' : 'Marcar como paga'}
-                    aria-label={row.pago ? 'Marcar como pendente' : 'Marcar como paga'}
-                    disabled={pagoLoadingId === row.id}
-                    onClick={() => void alternarPago(row)}
-                  >
-                    <IconCheck />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    title="Editar"
-                    aria-label="Editar"
-                    onClick={() => abrirEdicao(row)}
-                  >
-                    <IconEdit />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={styles.actionDanger}
-                    title="Excluir"
-                    aria-label="Excluir"
-                    onClick={() => setDeleteTarget(row)}
-                  >
-                    <IconTrash />
-                  </Button>
-                </div>
-              ),
-            },
+            ...(canWrite
+              ? [
+                  {
+                    key: 'actions',
+                    header: 'Ações',
+                    width: '132px',
+                    render: (row: Receita) => (
+                      <div className={styles.tableActions}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className={row.pago ? styles.actionPaid : undefined}
+                          title={row.pago ? 'Marcar como pendente' : 'Marcar como paga'}
+                          aria-label={row.pago ? 'Marcar como pendente' : 'Marcar como paga'}
+                          disabled={pagoLoadingId === row.id}
+                          onClick={() => void alternarPago(row)}
+                        >
+                          <IconCheck />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          title="Editar"
+                          aria-label="Editar"
+                          onClick={() => abrirEdicao(row)}
+                        >
+                          <IconEdit />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className={styles.actionDanger}
+                          title="Excluir"
+                          aria-label="Excluir"
+                          onClick={() => setDeleteTarget(row)}
+                        >
+                          <IconTrash />
+                        </Button>
+                      </div>
+                    ),
+                  },
+                ]
+              : []),
           ]}
         />
       </Card>
