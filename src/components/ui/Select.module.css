@@ -36,3 +36,11 @@
   font-size: 12px;
   color: var(--color-danger);
 }
+
+/* Mesmo motivo do Input: evita o zoom automático do iOS ao focar. */
+@media (max-width: 900px) {
+  .select {
+    height: var(--tap-target-min);
+    font-size: 16px;
+  }
+}

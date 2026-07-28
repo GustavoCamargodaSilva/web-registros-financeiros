@@ -352,6 +352,7 @@ export function ReceitasPage() {
               header: 'Pagador',
               width: '18%',
               truncate: true,
+              priority: 'primary',
               title: (row) => row.pagadorDescricao,
               render: (row) => row.pagadorDescricao,
             },
@@ -367,6 +368,7 @@ export function ReceitasPage() {
               key: 'valor',
               header: 'Valor',
               width: '14%',
+              priority: 'primary',
               render: (row) => (
                 <span className={styles.moneyIncome}>{formatCurrency(row.valor)}</span>
               ),
@@ -389,6 +391,7 @@ export function ReceitasPage() {
                     key: 'actions',
                     header: 'Ações',
                     width: '132px',
+                    priority: 'actions' as const,
                     render: (row: Receita) => (
                       <div className={styles.tableActions}>
                         <Button

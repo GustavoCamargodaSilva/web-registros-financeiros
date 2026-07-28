@@ -1,13 +1,39 @@
 .header {
-  height: var(--header-height);
+  min-height: calc(var(--header-height) + var(--safe-top));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
-  padding: 0 var(--spacing-lg);
+  padding: var(--safe-top) calc(var(--spacing-lg) + var(--safe-right)) 0
+    calc(var(--spacing-lg) + var(--safe-left));
   background: var(--color-brand);
   color: var(--color-header-text);
   box-sizing: border-box;
+}
+
+.menuButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  /* Recupera a margem visual consumida pelo alvo de toque de 44px */
+  margin-left: calc(-1 * var(--spacing-sm));
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.menuButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.menuButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .brandBlock {
@@ -63,12 +89,36 @@
   flex-shrink: 0;
 }
 
+/* Salvaguarda: o AppShell já só passa onMenuClick no mobile. */
+@media (min-width: 901px) {
+  .menuButton {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .header {
-    padding: 0 var(--spacing-md);
+    padding: var(--safe-top) calc(var(--spacing-md) + var(--safe-right)) 0
+      calc(var(--spacing-md) + var(--safe-left));
+  }
+
+  .brandBlock {
+    gap: var(--spacing-sm);
   }
 
   .brandName {
     font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* O nome do usuário passa a ser exibido no topo do drawer */
+  .user {
+    display: none;
+  }
+
+  .mark {
+    width: 32px;
+    height: 32px;
   }
 }

@@ -1,15 +1,17 @@
 .shell {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
-  grid-template-rows: var(--header-height) 1fr;
+  /* A primeira linha é automática porque o header cresce com a safe area */
+  grid-template-rows: auto 1fr;
   background: var(--color-background);
 }
 
 .header {
   grid-column: 1 / -1;
   grid-row: 1;
-  z-index: 20;
+  z-index: var(--z-header);
 }
 
 .sidebar {
@@ -23,29 +25,81 @@
   grid-column: 2;
   grid-row: 2;
   min-width: 0;
-  padding: var(--spacing-lg);
+  padding: var(--page-padding);
   overflow: auto;
+}
+
+.drawerHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.drawerUser {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.drawerClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.drawerClose:hover {
+  background: rgba(45, 55, 72, 0.04);
+  color: var(--color-text);
+}
+
+.drawerClose:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.drawerUserLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.drawerUserName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 900px) {
   .shell {
     grid-template-columns: 1fr;
-    grid-template-rows: var(--header-height) auto 1fr;
   }
 
   .header {
     grid-column: 1;
   }
 
-  .sidebar {
-    grid-column: 1;
-    grid-row: 2;
-    border-bottom: 1px solid var(--color-border);
-  }
-
+  /* A sidebar sai do fluxo e passa a viver dentro do drawer */
   .main {
     grid-column: 1;
-    grid-row: 3;
-    padding: var(--spacing-md);
+    grid-row: 2;
+    padding: var(--page-padding) calc(var(--page-padding) + var(--safe-right))
+      calc(var(--page-padding) + var(--safe-bottom)) calc(var(--page-padding) + var(--safe-left));
+    /* Devolve a rolagem ao documento para o navegador ocultar a barra de URL */
+    overflow: visible;
   }
 }

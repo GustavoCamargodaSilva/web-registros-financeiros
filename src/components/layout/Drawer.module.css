@@ -1,0 +1,53 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer);
+  background: rgba(16, 24, 40, 0.45);
+  animation: fadeIn 0.15s ease;
+}
+
+.panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(var(--drawer-width), 85vw);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  animation: slideIn 0.2s ease;
+}
+
+/* O painel recebe foco programático; o anel iria destoar de um container. */
+.panel:focus {
+  outline: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .panel {
+    animation: none;
+  }
+}

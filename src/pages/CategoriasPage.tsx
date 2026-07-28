@@ -3,7 +3,7 @@ import { categoriasApi } from '../api/categorias.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { DataTable } from '../components/ui/DataTable'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
@@ -79,14 +79,20 @@ export function CategoriasPage() {
     }
   }
 
-  const columns = [
-    { key: 'id', header: 'ID', render: (row: Categoria) => row.id },
-    { key: 'descricao', header: 'Descrição', render: (row: Categoria) => row.descricao },
+  const columns: DataTableColumn<Categoria>[] = [
+    { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Categoria) => row.id },
+    {
+      key: 'descricao',
+      header: 'Descrição',
+      priority: 'primary',
+      render: (row: Categoria) => row.descricao,
+    },
     ...(canWrite
       ? [
           {
             key: 'actions',
             header: 'Ações',
+            priority: 'actions' as const,
             render: (row: Categoria) => (
               <div className={styles.tableActions}>
                 <Button
@@ -111,7 +117,7 @@ export function CategoriasPage() {
     <div className={styles.stack}>
       {canWrite ? (
         <Card title="Nova categoria">
-          <form className={styles.form} onSubmit={handleSubmit}>
+          <form className={`${styles.form} ${styles.formNarrow}`} onSubmit={handleSubmit}>
             <Input
               label="Descrição"
               name="descricao"

@@ -133,6 +133,10 @@
 .form {
   display: grid;
   gap: var(--spacing-md);
+}
+
+/* Formulários de campo único: categorias, pagadores e convites */
+.formNarrow {
   max-width: 480px;
 }
 
@@ -140,7 +144,11 @@
   display: grid;
   gap: var(--spacing-md);
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  max-width: none;
+}
+
+/* Impede que um select com opção longa alargue a própria coluna */
+.formGrid > * {
+  min-width: 0;
 }
 
 .formActions {
@@ -173,5 +181,35 @@
 
   .formActions > * {
     flex: 1;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* CTA "Cadastrar" ocupa a largura toda em vez de ficar solto à esquerda */
+  .toolbar > button {
+    width: 100%;
+  }
+
+  /*
+   * auto-fit com minmax(160px) colapsa para uma única coluna em 360px,
+   * deixando o resumo desnecessariamente alto.
+   */
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .formHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryValue {
+    font-size: 16px;
   }
 }

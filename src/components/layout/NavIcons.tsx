@@ -148,3 +148,24 @@ export function IconMail(props: IconProps) {
     </BaseIcon>
   )
 }
+
+/** Abrir menu (hambúrguer) — visível apenas no mobile */
+export function IconMenu(props: IconProps) {
+  return (
+    <BaseIcon width="20" height="20" {...props}>
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </BaseIcon>
+  )
+}
+
+/** Fechar drawer */
+export function IconClose(props: IconProps) {
+  return (
+    <BaseIcon width="20" height="20" {...props}>
+      <path d="m6 6 12 12" />
+      <path d="m18 6-12 12" />
+    </BaseIcon>
+  )
+}

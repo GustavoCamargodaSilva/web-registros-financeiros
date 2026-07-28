@@ -3,7 +3,7 @@ import { pagadoresApi } from '../api/pagadores.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { DataTable } from '../components/ui/DataTable'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
@@ -79,14 +79,20 @@ export function PagadoresPage() {
     }
   }
 
-  const columns = [
-    { key: 'id', header: 'ID', render: (row: Pagador) => row.id },
-    { key: 'descricao', header: 'Descrição', render: (row: Pagador) => row.descricao },
+  const columns: DataTableColumn<Pagador>[] = [
+    { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Pagador) => row.id },
+    {
+      key: 'descricao',
+      header: 'Descrição',
+      priority: 'primary',
+      render: (row: Pagador) => row.descricao,
+    },
     ...(canWrite
       ? [
           {
             key: 'actions',
             header: 'Ações',
+            priority: 'actions' as const,
             render: (row: Pagador) => (
               <div className={styles.tableActions}>
                 <Button
@@ -111,7 +117,7 @@ export function PagadoresPage() {
     <div className={styles.stack}>
       {canWrite ? (
         <Card title="Novo pagador">
-          <form className={styles.form} onSubmit={handleSubmit}>
+          <form className={`${styles.form} ${styles.formNarrow}`} onSubmit={handleSubmit}>
             <Input
               label="Descrição"
               name="descricao"

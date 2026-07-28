@@ -48,6 +48,17 @@
   color: var(--color-danger);
 }
 
+/*
+ * O Safari do iOS aplica zoom ao focar campos com fonte menor que 16px.
+ * A altura acompanha o alvo mínimo de toque.
+ */
+@media (max-width: 900px) {
+  .input {
+    height: var(--tap-target-min);
+    font-size: 16px;
+  }
+}
+
 .hint {
   margin-top: 4px;
   font-size: 12px;

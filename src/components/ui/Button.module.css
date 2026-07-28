@@ -89,3 +89,17 @@
     transition: none;
   }
 }
+
+/* Alvo mínimo de toque (WCAG 2.5.5). No desktop as alturas menores são mantidas. */
+@media (max-width: 900px) {
+  .button,
+  .ghost {
+    height: var(--tap-target-min);
+  }
+
+  .icon {
+    width: var(--tap-target-min);
+    min-width: var(--tap-target-min);
+    height: var(--tap-target-min);
+  }
+}

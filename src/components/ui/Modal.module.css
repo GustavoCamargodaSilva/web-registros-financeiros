@@ -5,17 +5,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 900;
+  z-index: var(--z-modal);
   padding: var(--spacing-md);
 }
 
 .dialog {
   width: 100%;
   max-width: 420px;
+  /* Mensagens longas (exclusão de série) rolam dentro do diálogo */
+  max-height: calc(100dvh - 2 * var(--spacing-lg));
+  display: flex;
+  flex-direction: column;
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: var(--spacing-lg);
+}
+
+/* Recebe foco programático; o anel destoaria de um container */
+.dialog:focus {
+  outline: none;
 }
 
 .title {
@@ -27,10 +36,36 @@
 .message {
   margin-bottom: var(--spacing-lg);
   color: var(--color-text-muted);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+/* Bottom sheet: mantém as ações ao alcance do polegar */
+@media (max-width: 640px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .dialog {
+    max-width: 100%;
+    max-height: 85dvh;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    padding-bottom: calc(var(--spacing-lg) + var(--safe-bottom));
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
 }

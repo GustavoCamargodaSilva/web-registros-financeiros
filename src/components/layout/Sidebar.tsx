@@ -57,7 +57,12 @@ function isPathInGroup(pathname: string, group: MenuGroup) {
   return group.children.some((child) => child.to === pathname)
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  /** Chamado após navegar. O AppShell usa para fechar o drawer no mobile. */
+  onNavigate?: () => void
+}
+
+export function Sidebar({ onNavigate }: SidebarProps) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { canManageMembros } = useAmbientePermissoes()
@@ -94,12 +99,14 @@ export function Sidebar() {
       setOpenGroups((current) => ({ ...current, [group.id]: true }))
       if (defaultPath && !inGroup) {
         void navigate(defaultPath)
+        onNavigate?.()
       }
       return
     }
 
     if (!inGroup && defaultPath) {
       void navigate(defaultPath)
+      onNavigate?.()
       return
     }
 
@@ -136,6 +143,7 @@ export function Sidebar() {
                     <NavLink
                       key={link.to}
                       to={link.to}
+                      onClick={() => onNavigate?.()}
                       className={({ isActive }) =>
                         [styles.sublink, isActive ? styles.active : '']
                           .filter(Boolean)

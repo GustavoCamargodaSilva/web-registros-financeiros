@@ -12,3 +12,10 @@
   font-weight: 700;
   color: var(--color-text);
 }
+
+/* Recupera ~16px de largura útil em telas estreitas */
+@media (max-width: 640px) {
+  .card {
+    padding: var(--spacing-md);
+  }
+}

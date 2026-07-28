@@ -92,6 +92,18 @@ Usar sempre as variáveis CSS. Não hardcodar hex em páginas/componentes, excet
 | `--shadow-sm` | `0 1px 3px rgba(15, 23, 42, 0.06)` | Cards |
 | `--shadow-md` | `0 4px 12px rgba(15, 23, 42, 0.08)` | Dropdown / modal |
 
+### Tokens de layout e responsividade
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--header-height` | `56px` | Altura base do header (cresce com a safe area) |
+| `--sidebar-width` | `248px` | Sidebar fixa no desktop |
+| `--drawer-width` | `280px` | Drawer no mobile (limitado a `85vw`) |
+| `--page-padding` | `24px` → `16px` em ≤640px | Padding do `main` |
+| `--tap-target-min` | `44px` | Alvo mínimo de toque abaixo de 900px |
+| `--safe-top/right/bottom/left` | `env(safe-area-inset-*)` | Notch e barra inferior do iOS |
+| `--z-header` / `--z-drawer` / `--z-modal` / `--z-toast` | `20` / `800` / `900` / `1000` | Ordem de empilhamento |
+
 ---
 
 ## 6. Layout (shell)
@@ -125,11 +137,33 @@ Usar sempre as variáveis CSS. Não hardcodar hex em páginas/componentes, excet
 - Item ativo: fundo azul translúcido + texto/ícone `--color-primary`.
 - Ícones outline, stroke fino, cinza → primary quando ativo.
 
-### Mobile
+### Breakpoints
 
-- Header compacto azul.
-- Sidebar vira drawer ou lista colapsável no topo.
-- Cards empilham em coluna única.
+Escala desktop-first. Os valores vivem em `src/constants/breakpoints.ts` (JS) e estão
+documentados no topo de `src/styles/tokens.css` (CSS). **Não criar breakpoints novos.**
+
+| Nome | Consulta | Alvo |
+|------|----------|------|
+| `xs` | `max-width: 480px` | Celular pequeno (referência: 360px) |
+| `sm` | `max-width: 640px` | Celular padrão |
+| `md` | `max-width: 900px` | **Corte mobile/desktop** |
+| `lg` | `max-width: 1200px` | Notebook |
+
+Como Custom Properties não funcionam dentro de `@media`, os literais ficam nas próprias
+consultas. Para decisões que o CSS não resolve (trocar componente, não só estilo), use
+`useBreakpoint()`, que lê os mesmos valores — CSS e JS concordam no mesmo pixel.
+
+### Mobile (≤ 900px)
+
+- Header compacto azul, com botão hambúrguer à esquerda. Abaixo de 480px o nome do
+  usuário sai do header e aparece no topo do drawer.
+- **Sidebar vira drawer**: painel deslizante sobre overlay, com foco preso, fechamento
+  por `Escape`, por toque no overlay, pelo botão de fechar e ao escolher um item.
+- `DataTable` **troca a tabela por cartões** (ver seção 7).
+- Cards empilham em coluna única; o `main` devolve a rolagem ao documento para que o
+  navegador consiga ocultar a barra de endereço.
+- Modal vira **bottom sheet** abaixo de 640px.
+- Alvos de toque com no mínimo `--tap-target-min`.
 - Bottom nav (futuro): no máximo 3–4 destinos primários; fundo branco, ícone + label.
 
 ---
@@ -145,13 +179,16 @@ Usar sempre as variáveis CSS. Não hardcodar hex em páginas/componentes, excet
 | `danger` | Excluir / ação destrutiva |
 | `outline` | Secundário (Fechar, Cancelar, Sair) |
 
-Altura padrão: 40px. Raio: `--radius-md`. Sem pills em botões de formulário (pills só em filtros de mês).
+Altura padrão: 40px no desktop, `--tap-target-min` (44px) abaixo de 900px. Raio: `--radius-md`.
+Sem pills em botões de formulário (pills só em filtros de mês).
 
 ### Input / Select
 
 - Fundo branco, borda `--color-border`, focus ring `--color-primary`.
 - Label acima, muted, 13px.
 - Erro: borda/texto `--color-danger`.
+- Abaixo de 900px a fonte sobe para **16px**: com menos que isso o Safari do iOS aplica
+  zoom automático ao focar o campo e desalinha o layout inteiro.
 
 ### Card
 
@@ -164,6 +201,20 @@ Altura padrão: 40px. Raio: `--radius-md`. Sem pills em botões de formulário (
 - Cabeçalho muted, linhas com borda inferior leve.
 - Hover de linha sutil (`background` cinza muito claro).
 - Colunas de valor à direita; ações (Editar) à direita.
+
+**Abaixo de 900px cada linha vira um cartão**, porque larguras fixas em 7 colunas forçariam
+rolagem horizontal permanente. O que aparece no cartão é definido por coluna:
+
+| Campo | Efeito no cartão |
+|-------|------------------|
+| `priority: 'primary'` | Destaque no topo (ex.: descrição à esquerda, valor à direita) |
+| `priority: 'secondary'` | Par rótulo/valor no corpo — **padrão** |
+| `priority: 'low'` | Igual ao secondary, porém sempre por último |
+| `priority: 'actions'` | Rodapé do cartão, sem rótulo |
+| `hideOnMobile: true` | Some do cartão e **permanece** na tabela do desktop (ex.: coluna ID) |
+
+Toda coluna nova deve declarar sua prioridade. `mobileMode="scroll"` mantém a tabela com
+rolagem horizontal quando o cartão não fizer sentido.
 
 ### Badge / status
 
@@ -201,8 +252,12 @@ Altura padrão: 40px. Raio: `--radius-md`. Sem pills em botões de formulário (
 
 - Contraste AA em texto sobre fundo.
 - Foco de teclado visível (outline primary).
-- `prefers-reduced-motion`: reduzir animações de menu/chevron.
+- `prefers-reduced-motion`: reduzir animações de menu/chevron e do drawer.
 - Não depender só de cor para status (complementar com texto/ícone).
+- Alvos de toque de no mínimo 44×44px abaixo de 900px (`--tap-target-min`).
+- Overlays (drawer e modal) prendem o foco, fecham com `Escape` e bloqueiam a rolagem do
+  fundo. O bloqueio é centralizado em `src/utils/scrollLock.ts`, com contagem de
+  referências para o caso de drawer e modal abertos ao mesmo tempo.
 
 ---
 
@@ -224,7 +279,10 @@ Altura padrão: 40px. Raio: `--radius-md`. Sem pills em botões de formulário (
 - [ ] Cores/espaços/raios vêm de tokens
 - [ ] Valores financeiros com semântica correta
 - [ ] Shell (header/sidebar/main) respeitado
-- [ ] Mobile legível (coluna única, sem overflow horizontal)
+- [ ] Sem rolagem horizontal entre 320px e 1920px
+- [ ] Colunas novas de `DataTable` declaram `priority`
+- [ ] Alvos de toque ≥ 44px abaixo de 900px
+- [ ] Breakpoints restritos à escala da seção 6
 - [ ] Textos e empty states no tom do DS
 - [ ] Nenhum desvio “por estética” sem atualizar este documento
 

@@ -1,5 +1,14 @@
 .wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Afordância de corte para quando a tabela mantém rolagem horizontal no mobile */
+@media (max-width: 900px) {
+  .wrapperHint {
+    background: linear-gradient(to left, rgba(15, 23, 42, 0.09), transparent) right / 20px 100%
+      no-repeat;
+  }
 }
 
 .table {
@@ -64,4 +73,77 @@
   display: flex;
   gap: var(--spacing-sm);
   justify-content: flex-end;
+}
+
+/* Modo card — substitui a tabela abaixo de 900px */
+
+.cards {
+  display: grid;
+  gap: var(--spacing-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  gap: var(--spacing-sm);
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.cardHeadline {
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.cardHeadline:not(:first-child) {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.cardBody {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.cardRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.cardLabel {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.cardValue {
+  margin: 0;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
 }

@@ -155,7 +155,10 @@ export function ConvitesPage() {
           </p>
         )}
 
-        <form className={styles.form} onSubmit={(event) => void handleSubmit(event)}>
+        <form
+          className={`${styles.form} ${styles.formNarrow}`}
+          onSubmit={(event) => void handleSubmit(event)}
+        >
           <Input
             label="E-mail do convidado"
             name="email"
@@ -190,6 +193,7 @@ export function ConvitesPage() {
               header: 'Nome',
               width: isDono ? '40%' : '50%',
               truncate: true,
+              priority: 'primary',
               title: (row) => row.nome,
               render: (row) => primeiroNome(row.nome),
             },
@@ -205,6 +209,7 @@ export function ConvitesPage() {
                     key: 'actions',
                     header: 'Ações',
                     width: '25%',
+                    priority: 'actions' as const,
                     render: (row: MembroAmbiente) =>
                       row.papel === 'EDITOR' || row.papel === 'LEITOR' ? (
                         <div className={styles.tableActions}>

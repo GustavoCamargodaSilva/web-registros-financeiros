@@ -125,4 +125,9 @@
   .sidebar {
     border-right: 0;
   }
+
+  .itemRow,
+  .sublink {
+    min-height: var(--tap-target-min);
+  }
 }

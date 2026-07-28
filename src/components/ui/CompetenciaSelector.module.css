@@ -107,3 +107,44 @@
     transition: none;
   }
 }
+
+/*
+ * No mobile o flex-wrap quebrava as 12 pills em linhas irregulares, mudando de
+ * altura conforme a largura. O grid fixa a quantidade por linha.
+ */
+@media (max-width: 900px) {
+  .months {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .pill {
+    height: var(--tap-target-min);
+    padding: 0 8px;
+  }
+
+  .yearArrow,
+  .yearDisplay {
+    height: var(--tap-target-min);
+  }
+
+  .yearArrow {
+    width: var(--tap-target-min);
+  }
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .yearNav {
+    justify-content: space-between;
+  }
+
+  .months {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

@@ -567,6 +567,7 @@ export function DespesasPage() {
               header: 'Descrição',
               width: '160px',
               truncate: true,
+              priority: 'primary',
               title: (row) => row.descricao,
               render: (row) => row.descricao,
             },
@@ -574,6 +575,7 @@ export function DespesasPage() {
               key: 'valor',
               header: 'Valor',
               width: '110px',
+              priority: 'primary',
               render: (row) => (
                 <span className={styles.moneyExpense}>{formatCurrency(row.valor)}</span>
               ),
@@ -599,6 +601,7 @@ export function DespesasPage() {
               key: 'parcela',
               header: 'Parcela',
               width: '90px',
+              priority: 'low',
               render: (row) =>
                 row.totalParcelas && row.totalParcelas > 1
                   ? `${row.numeroParcela}/${row.totalParcelas}`
@@ -616,6 +619,7 @@ export function DespesasPage() {
                     key: 'actions',
                     header: 'Ações',
                     width: '132px',
+                    priority: 'actions' as const,
                     render: (row: Despesa) => (
                       <div className={styles.tableActions}>
                         <Button

@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
+import { lockBodyScroll, unlockBodyScroll } from '../../utils/scrollLock'
 import { Button } from './Button'
 import styles from './Modal.module.css'
 
@@ -23,6 +25,31 @@ export function Modal({
   onCancel,
   variant = 'primary',
 }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  useFocusTrap(dialogRef, open)
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    lockBodyScroll()
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onCancel()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      unlockBodyScroll()
+    }
+  }, [open, onCancel])
+
   if (!open) {
     return null
   }
@@ -30,10 +57,12 @@ export function Modal({
   return (
     <div className={styles.overlay} role="presentation" onClick={onCancel}>
       <div
+        ref={dialogRef}
         className={styles.dialog}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <h3 id="modal-title" className={styles.title}>
