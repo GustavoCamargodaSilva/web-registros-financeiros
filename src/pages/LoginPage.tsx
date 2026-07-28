@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input'
 import { useAuth } from '../context/AuthContext'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import { buildAuthPath, getSafeReturnUrl } from '../utils/returnUrl'
+import { AuthPage } from './AuthPage'
 import styles from './auth.module.css'
 
 export function LoginPage() {
@@ -58,40 +59,38 @@ export function LoginPage() {
   }
 
   return (
-    <div className={styles.authPage}>
-      <div className={styles.card}>
-        <Card title="Entrar">
-          {infoMessage ? <p className={styles.message}>{infoMessage}</p> : null}
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <Input
-              label="E-mail ou telefone"
-              name="login"
-              value={loginField}
-              error={errors.login}
-              autoComplete="username"
-              onChange={(event) => setLoginField(event.target.value)}
-            />
-            <Input
-              label="Senha"
-              name="senha"
-              type="password"
-              value={senha}
-              error={errors.senha}
-              autoComplete="current-password"
-              onChange={(event) => setSenha(event.target.value)}
-            />
-            <Button type="submit" disabled={loading}>
-              Entrar
-            </Button>
-          </form>
-          <p className={styles.footer}>
-            Não tem conta?{' '}
-            <Link className={styles.link} to={buildAuthPath('/registro', returnUrl)}>
-              Cadastre-se
-            </Link>
-          </p>
-        </Card>
-      </div>
-    </div>
+    <AuthPage>
+      <Card title="Entrar">
+        {infoMessage ? <p className={styles.message}>{infoMessage}</p> : null}
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input
+            label="E-mail ou telefone"
+            name="login"
+            value={loginField}
+            error={errors.login}
+            autoComplete="username"
+            onChange={(event) => setLoginField(event.target.value)}
+          />
+          <Input
+            label="Senha"
+            name="senha"
+            type="password"
+            value={senha}
+            error={errors.senha}
+            autoComplete="current-password"
+            onChange={(event) => setSenha(event.target.value)}
+          />
+          <Button type="submit" disabled={loading}>
+            Entrar
+          </Button>
+        </form>
+        <p className={styles.footer}>
+          Não tem conta?{' '}
+          <Link className={styles.link} to={buildAuthPath('/registro', returnUrl)}>
+            Cadastre-se
+          </Link>
+        </p>
+      </Card>
+    </AuthPage>
   )
 }

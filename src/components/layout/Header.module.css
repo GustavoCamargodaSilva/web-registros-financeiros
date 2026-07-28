@@ -28,11 +28,11 @@
 }
 
 .menuButton:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--color-header-overlay);
 }
 
 .menuButton:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--color-header-text);
   outline-offset: 2px;
 }
 
@@ -51,7 +51,7 @@
   height: 36px;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--color-header-mark);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;

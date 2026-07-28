@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { useAuth } from '../../context/AuthContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import { Drawer } from './Drawer'
 import { Header } from './Header'
 import { IconClose } from './NavIcons'
@@ -34,6 +35,7 @@ export function AppShell() {
           onMenuClick={isMobile ? () => setDrawerOpen((open) => !open) : undefined}
           menuOpen={drawerOpen}
           menuControls={DRAWER_ID}
+          showThemeToggle={!isMobile}
         />
       </header>
 
@@ -63,6 +65,10 @@ export function AppShell() {
             </button>
           </div>
           <Sidebar onNavigate={() => setDrawerOpen(false)} />
+          <div className={styles.drawerFooter}>
+            <span className={styles.drawerFooterLabel}>Tema</span>
+            <ThemeToggle variant="outline" />
+          </div>
         </Drawer>
       ) : (
         <aside className={styles.sidebar}>

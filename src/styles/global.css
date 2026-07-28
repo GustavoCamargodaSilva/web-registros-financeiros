@@ -51,3 +51,25 @@ input,
 select {
   font: inherit;
 }
+
+/*
+ * Transição ao trocar de tema. Restrita ao fundo da página e aos campos de
+ * formulário de propósito: aplicar transição em `*` (ou em `td`) faz o
+ * navegador animar milhares de nós de uma tabela de lançamentos de uma vez e
+ * trava a troca. As demais superfícies mudam instantaneamente.
+ */
+body,
+input,
+select,
+textarea {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  input,
+  select,
+  textarea {
+    transition: none;
+  }
+}

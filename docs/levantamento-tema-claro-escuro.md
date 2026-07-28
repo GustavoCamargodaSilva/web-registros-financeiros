@@ -1,6 +1,6 @@
 # Levantamento — Botão de Alternância Tema Claro / Escuro
 
-> **Status:** Levantamento para implementação. **Nenhuma linha de código foi alterada.**
+> **Status:** Implementado. Pendente apenas a validação automatizada (`npm run build`, `npm run test:run`) e a auditoria visual de contraste em navegador real — ver seção 9.
 > **Data:** 27/07/2026
 > **Escopo:** Adicionar um controle na interface que permita ao usuário alternar entre tema claro e escuro, com preferência persistida entre sessões e sem piscar de tela no carregamento.
 
@@ -571,3 +571,31 @@ Registrado para decisão futura:
 | Botão desabilitado | | |
 | Item de menu ativo | | |
 | Foco por teclado | | |
+
+---
+
+## 12. Registro da Implementação
+
+### 12.1 O que foi entregue
+
+Todas as tasks de E1 a E5 foram implementadas. De E6 ficaram concluídas as automatizadas (T6.3 testes, T6.5 documentação); as que exigem navegador real seguem pendentes: **T6.1** (medição de contraste com ferramenta), **T6.2** (matriz da seção 11) e **T6.4** (comparação visual do tema claro antes/depois).
+
+O critério de aceite 8 já está satisfeito: a busca por `#hex` e `rgba()` em `src/**/*.module.css` retorna vazio.
+
+### 12.2 Desvios conscientes do plano
+
+1. **Dois tokens de superfície tênue em vez de um.** O plano previa consolidar `rgba(238, 241, 246, 0.55)` (blocos de resumo) e `rgba(238, 241, 246, 0.65)` (cabeçalho de tabela) num só token. Como os alfas diferem, unificar mudaria o tema claro e violaria a regra 1.3. Ficaram `--color-surface-subtle` e `--color-table-header`, cada um com o valor exato que substituiu.
+
+2. **Escopo maior que os 34 literais mapeados.** A implementação de responsividade, concluída antes desta, introduziu quatro cores literais novas (overlay do drawer, hover e foco do botão hambúrguer, hover do botão de fechar do drawer, gradiente de dica de rolagem da tabela). Todas foram tokenizadas junto, o que gerou `--color-scroll-hint` e reaproveitou `--color-overlay` e `--color-surface-hover`.
+
+3. **Transição restrita a `body` e campos de formulário.** O plano falava em "elementos estruturais". Na prática, incluir superfícies como `td` faria o navegador animar milhares de nós ao trocar o tema numa tabela de lançamentos. Cards e tabelas trocam instantaneamente; só o fundo da página e os campos animam.
+
+4. **Botão de tema fora do header no mobile (ajuste à T4.3).** Somados hambúrguer, marca, botão de tema e "Sair", sobravam cerca de 116px para o nome da aplicação numa tela de 360px — abaixo dos ~150px que "Registros Financeiros" ocupa. O botão foi para o rodapé do drawer, com rótulo "Tema", e o `Header` ganhou a prop opcional `showThemeToggle` (default `true`, preservando o comportamento para quem já o usava). Coberto por teste em `AppShell.test.tsx`.
+
+5. **Moldura `AuthPage` criada para a T4.4.** `AceitarConvitePage` tem cinco retornos distintos, todos repetindo `.authPage` + `.card`. Em vez de inserir o botão nos sete pontos, o par virou o componente `src/pages/AuthPage.tsx`. A marcação renderizada é idêntica; nenhuma classe de `auth.module.css` foi removida.
+
+6. **Sem customização de barra de rolagem (T5.3).** Estilizar `::-webkit-scrollbar` ou `scrollbar-width` alteraria também a aparência do tema claro, contra a regra 1.3. A declaração `color-scheme` em ambos os temas já faz o navegador renderizar a barra no tom certo, que era o objetivo da task.
+
+### 12.3 Contraste — o que ainda precisa ser medido
+
+Os valores da paleta escura foram escolhidos com estimativa de luminância relativa, não com ferramenta de medição. As margens calculadas ficam confortavelmente acima de AA (o par mais apertado é `--color-on-primary` branco sobre `--color-primary` `#1a6ec0`, em torno de 5,3:1), mas **T6.1 continua sendo o passo bloqueante** antes de considerar a entrega fechada.

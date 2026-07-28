@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../../context/AuthContext'
+import { ThemeProvider } from '../../context/ThemeContext'
 import { setViewportWidth } from '../../test/viewport'
 import { ToastProvider } from '../toast/ToastProvider'
 import { AppShell } from './AppShell'
@@ -24,20 +25,24 @@ vi.mock('../../api/auth.api', () => ({
 
 function renderShell() {
   return render(
-    <MemoryRouter initialEntries={['/categorias']}>
-      <ToastProvider>
-        <AuthProvider>
-          <Routes>
-            <Route element={<AppShell />}>
-              <Route path="/categorias" element={<div>Conteúdo da página</div>} />
-              <Route path="/despesas" element={<div>Despesas</div>} />
-            </Route>
-          </Routes>
-        </AuthProvider>
-      </ToastProvider>
-    </MemoryRouter>,
+    <ThemeProvider>
+      <MemoryRouter initialEntries={['/categorias']}>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
+              <Route element={<AppShell />}>
+                <Route path="/categorias" element={<div>Conteúdo da página</div>} />
+                <Route path="/despesas" element={<div>Despesas</div>} />
+              </Route>
+            </Routes>
+          </AuthProvider>
+        </ToastProvider>
+      </MemoryRouter>
+    </ThemeProvider>,
   )
 }
+
+const themeToggle = () => screen.queryByRole('button', { name: /Ativar tema/ })
 
 describe('AppShell', () => {
   it('no desktop mostra a sidebar fixa e nenhum botão de menu', async () => {
@@ -82,5 +87,25 @@ describe('AppShell', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('no desktop o botão de tema fica no header', async () => {
+    setViewportWidth(1280)
+    renderShell()
+    await screen.findByText('Conteúdo da página')
+
+    expect(themeToggle()).toBeInTheDocument()
+  })
+
+  it('no mobile o botão de tema vive no drawer, não no header', async () => {
+    setViewportWidth(360)
+    renderShell()
+    await screen.findByText('Conteúdo da página')
+
+    expect(themeToggle()).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir menu' }))
+
+    expect(themeToggle()).toBeInTheDocument()
   })
 })

@@ -31,8 +31,8 @@
 }
 
 .yearArrow:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--color-primary-text);
+  color: var(--color-primary-text);
 }
 
 .yearArrow:disabled {
@@ -41,7 +41,7 @@
 }
 
 .yearArrow:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary-text);
   outline-offset: 2px;
 }
 
@@ -86,20 +86,20 @@
 }
 
 .pill:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--color-primary-text);
+  color: var(--color-primary-text);
 }
 
 .pillActive {
   background: var(--color-success);
   border-color: var(--color-success);
-  color: #fff;
+  color: var(--color-on-success);
 }
 
 .pillActive:hover {
   background: var(--color-success);
   border-color: var(--color-success);
-  color: #fff;
+  color: var(--color-on-success);
 }
 
 @media (prefers-reduced-motion: reduce) {

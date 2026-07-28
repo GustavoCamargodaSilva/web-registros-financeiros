@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import { SENHA_MAX_LENGTH, SENHA_MIN_LENGTH, validarSenha } from '../utils/senha'
 import { buildAuthPath, getSafeReturnUrl } from '../utils/returnUrl'
+import { AuthPage } from './AuthPage'
 import styles from './auth.module.css'
 
 export function RegistroPage() {
@@ -68,66 +69,64 @@ export function RegistroPage() {
   }
 
   return (
-    <div className={styles.authPage}>
-      <div className={styles.card}>
-        <Card title="Criar conta">
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <Input
-              label="Nome"
-              name="nome"
-              value={form.nome}
-              error={errors.nome}
-              onChange={(event) => setForm((current) => ({ ...current, nome: event.target.value }))}
-            />
-            <Input
-              label="Sobrenome"
-              name="sobrenome"
-              value={form.sobrenome}
-              error={errors.sobrenome}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, sobrenome: event.target.value }))
-              }
-            />
-            <Input
-              label="Telefone"
-              name="telefone"
-              placeholder="11999998888"
-              value={form.telefone}
-              error={errors.telefone}
-              onChange={(event) => setForm((current) => ({ ...current, telefone: event.target.value }))}
-            />
-            <Input
-              label="E-mail"
-              name="email"
-              type="email"
-              value={form.email}
-              error={errors.email}
-              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-            />
-            <Input
-              label="Senha"
-              name="senha"
-              type="password"
-              value={form.senha}
-              error={errors.senha}
-              hint={`Entre ${SENHA_MIN_LENGTH} e ${SENHA_MAX_LENGTH} caracteres`}
-              minLength={SENHA_MIN_LENGTH}
-              maxLength={SENHA_MAX_LENGTH}
-              autoComplete="new-password"
-              onChange={(event) => setForm((current) => ({ ...current, senha: event.target.value }))}
-            />
-            <Button type="submit" disabled={loading}>
-              Cadastrar
-            </Button>
-          </form>
-          <p className={styles.footer}>
-            Já tem conta?{' '}
-            <Link className={styles.link} to={buildAuthPath('/login', returnUrl)}>
-              Entrar
-            </Link>
-          </p>
-        </Card>
-      </div>
-    </div>
+    <AuthPage>
+      <Card title="Criar conta">
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input
+            label="Nome"
+            name="nome"
+            value={form.nome}
+            error={errors.nome}
+            onChange={(event) => setForm((current) => ({ ...current, nome: event.target.value }))}
+          />
+          <Input
+            label="Sobrenome"
+            name="sobrenome"
+            value={form.sobrenome}
+            error={errors.sobrenome}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, sobrenome: event.target.value }))
+            }
+          />
+          <Input
+            label="Telefone"
+            name="telefone"
+            placeholder="11999998888"
+            value={form.telefone}
+            error={errors.telefone}
+            onChange={(event) => setForm((current) => ({ ...current, telefone: event.target.value }))}
+          />
+          <Input
+            label="E-mail"
+            name="email"
+            type="email"
+            value={form.email}
+            error={errors.email}
+            onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+          />
+          <Input
+            label="Senha"
+            name="senha"
+            type="password"
+            value={form.senha}
+            error={errors.senha}
+            hint={`Entre ${SENHA_MIN_LENGTH} e ${SENHA_MAX_LENGTH} caracteres`}
+            minLength={SENHA_MIN_LENGTH}
+            maxLength={SENHA_MAX_LENGTH}
+            autoComplete="new-password"
+            onChange={(event) => setForm((current) => ({ ...current, senha: event.target.value }))}
+          />
+          <Button type="submit" disabled={loading}>
+            Cadastrar
+          </Button>
+        </form>
+        <p className={styles.footer}>
+          Já tem conta?{' '}
+          <Link className={styles.link} to={buildAuthPath('/login', returnUrl)}>
+            Entrar
+          </Link>
+        </p>
+      </Card>
+    </AuthPage>
   )
 }

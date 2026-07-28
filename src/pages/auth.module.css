@@ -1,4 +1,5 @@
 .authPage {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -7,8 +8,14 @@
   padding: calc(var(--spacing-lg) + var(--safe-top)) calc(var(--spacing-lg) + var(--safe-right))
     calc(var(--spacing-lg) + var(--safe-bottom)) calc(var(--spacing-lg) + var(--safe-left));
   background:
-    radial-gradient(1200px 500px at 10% -10%, rgba(11, 92, 173, 0.18), transparent 55%),
+    radial-gradient(1200px 500px at 10% -10%, var(--color-auth-glow), transparent 55%),
     var(--color-background);
+}
+
+.themeToggle {
+  position: absolute;
+  top: calc(var(--spacing-md) + var(--safe-top));
+  right: calc(var(--spacing-md) + var(--safe-right));
 }
 
 .card {
@@ -29,14 +36,14 @@
 }
 
 .link {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: 600;
 }
 
 .error {
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  background: rgba(231, 76, 60, 0.1);
+  background: var(--color-danger-surface);
   color: var(--color-danger);
   font-size: 13px;
 }

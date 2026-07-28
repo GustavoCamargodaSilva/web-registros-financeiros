@@ -6,7 +6,7 @@
 /* Afordância de corte para quando a tabela mantém rolagem horizontal no mobile */
 @media (max-width: 900px) {
   .wrapperHint {
-    background: linear-gradient(to left, rgba(15, 23, 42, 0.09), transparent) right / 20px 100%
+    background: linear-gradient(to left, var(--color-scroll-hint), transparent) right / 20px 100%
       no-repeat;
   }
 }
@@ -31,11 +31,11 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
-  background: rgba(238, 241, 246, 0.65);
+  background: var(--color-table-header);
 }
 
 .table tbody tr:hover {
-  background: rgba(11, 92, 173, 0.03);
+  background: var(--color-row-hover);
 }
 
 .table th.alignRight,

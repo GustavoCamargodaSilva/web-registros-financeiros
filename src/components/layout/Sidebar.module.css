@@ -36,11 +36,11 @@
 }
 
 .itemRow:hover {
-  background: rgba(45, 55, 72, 0.04);
+  background: var(--color-surface-hover);
 }
 
 .itemRow:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary-text);
   outline-offset: 2px;
 }
 
@@ -50,7 +50,7 @@
   justify-content: center;
   width: 16px;
   flex-shrink: 0;
-  color: #9aa3af;
+  color: var(--color-icon-muted);
 }
 
 .icon {
@@ -59,7 +59,7 @@
   justify-content: center;
   width: 20px;
   flex-shrink: 0;
-  color: #5b6573;
+  color: var(--color-icon);
 }
 
 .itemLabel {
@@ -98,21 +98,21 @@
 }
 
 .sublink:hover {
-  background: rgba(45, 55, 72, 0.04);
+  background: var(--color-surface-hover);
 }
 
 .sublink .icon {
-  color: #5b6573;
+  color: var(--color-icon);
 }
 
 .active {
-  background: rgba(11, 92, 173, 0.08);
-  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-text);
   font-weight: 600;
 }
 
 .active .icon {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 @media (prefers-reduced-motion: reduce) {

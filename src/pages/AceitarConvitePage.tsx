@@ -8,6 +8,7 @@ import { Card } from '../components/ui/Card'
 import { useAuth } from '../context/AuthContext'
 import type { AceitarConviteResponse } from '../types/convite.types'
 import { buildAuthPath } from '../utils/returnUrl'
+import { AuthPage } from './AuthPage'
 import styles from './auth.module.css'
 
 type PageStatus = 'idle' | 'accepting' | 'success' | 'error'
@@ -72,116 +73,106 @@ export function AceitarConvitePage() {
 
   if (!token) {
     return (
-      <div className={styles.authPage}>
-        <div className={styles.card}>
-          <Card title="Convite inválido">
-            <p className={styles.message}>
-              O link de convite está incompleto ou inválido. Peça um novo convite ao responsável.
-            </p>
-            <div className={styles.actions}>
-              <Button type="button" onClick={() => navigate('/login')}>
-                Ir para o login
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </div>
+      <AuthPage>
+        <Card title="Convite inválido">
+          <p className={styles.message}>
+            O link de convite está incompleto ou inválido. Peça um novo convite ao responsável.
+          </p>
+          <div className={styles.actions}>
+            <Button type="button" onClick={() => navigate('/login')}>
+              Ir para o login
+            </Button>
+          </div>
+        </Card>
+      </AuthPage>
     )
   }
 
   if (isLoading || (isAuthenticated && (status === 'idle' || status === 'accepting'))) {
     return (
-      <div className={styles.authPage}>
-        <div className={styles.card}>
-          <Card title="Aceitar convite">
-            <p className={styles.message}>Aceitando convite…</p>
-          </Card>
-        </div>
-      </div>
+      <AuthPage>
+        <Card title="Aceitar convite">
+          <p className={styles.message}>Aceitando convite…</p>
+        </Card>
+      </AuthPage>
     )
   }
 
   if (!isAuthenticated) {
     return (
-      <div className={styles.authPage}>
-        <div className={styles.card}>
-          <Card title="Convite para editar despesas">
-            <p className={styles.message}>
-              Para aceitar o convite, entre com a conta do e-mail convidado ou crie uma conta com esse
-              mesmo e-mail.
-            </p>
-            <div className={styles.actions}>
-              <Button type="button" onClick={() => navigate(buildAuthPath('/login', returnUrl))}>
-                Já tenho conta
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(buildAuthPath('/registro', returnUrl))}
-              >
-                Criar conta
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </div>
+      <AuthPage>
+        <Card title="Convite para editar despesas">
+          <p className={styles.message}>
+            Para aceitar o convite, entre com a conta do e-mail convidado ou crie uma conta com esse
+            mesmo e-mail.
+          </p>
+          <div className={styles.actions}>
+            <Button type="button" onClick={() => navigate(buildAuthPath('/login', returnUrl))}>
+              Já tenho conta
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(buildAuthPath('/registro', returnUrl))}
+            >
+              Criar conta
+            </Button>
+          </div>
+        </Card>
+      </AuthPage>
     )
   }
 
   if (status === 'success' && result) {
     return (
-      <div className={styles.authPage}>
-        <div className={styles.card}>
-          <Card title="Convite aceito">
-            <p className={styles.message}>
-              Você entrou no ambiente <strong>{result.ambienteNome}</strong> como{' '}
-              <strong>{result.papel}</strong>.
-            </p>
-            <div className={styles.actions}>
-              <Button type="button" onClick={() => navigate('/despesas')}>
-                Ir para despesas
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </div>
+      <AuthPage>
+        <Card title="Convite aceito">
+          <p className={styles.message}>
+            Você entrou no ambiente <strong>{result.ambienteNome}</strong> como{' '}
+            <strong>{result.papel}</strong>.
+          </p>
+          <div className={styles.actions}>
+            <Button type="button" onClick={() => navigate('/despesas')}>
+              Ir para despesas
+            </Button>
+          </div>
+        </Card>
+      </AuthPage>
     )
   }
 
   return (
-    <div className={styles.authPage}>
-      <div className={styles.card}>
-        <Card title="Não foi possível aceitar">
-          {errorMessage ? <p className={styles.error}>{errorMessage}</p> : null}
-          <div className={styles.actions}>
-            <Button
-              type="button"
-              onClick={() => {
-                acceptGuard.done = null
-                void aceitar()
-              }}
-            >
-              Tentar novamente
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={async () => {
-                acceptGuard.done = null
-                await logout()
-                navigate(buildAuthPath('/login', returnUrl))
-              }}
-            >
-              Sair e entrar com outro e-mail
-            </Button>
-          </div>
-          <p className={styles.footer}>
-            <Link className={styles.link} to="/despesas">
-              Voltar ao app
-            </Link>
-          </p>
-        </Card>
-      </div>
-    </div>
+    <AuthPage>
+      <Card title="Não foi possível aceitar">
+        {errorMessage ? <p className={styles.error}>{errorMessage}</p> : null}
+        <div className={styles.actions}>
+          <Button
+            type="button"
+            onClick={() => {
+              acceptGuard.done = null
+              void aceitar()
+            }}
+          >
+            Tentar novamente
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={async () => {
+              acceptGuard.done = null
+              await logout()
+              navigate(buildAuthPath('/login', returnUrl))
+            }}
+          >
+            Sair e entrar com outro e-mail
+          </Button>
+        </div>
+        <p className={styles.footer}>
+          <Link className={styles.link} to="/despesas">
+            Voltar ao app
+          </Link>
+        </p>
+      </Card>
+    </AuthPage>
   )
 }

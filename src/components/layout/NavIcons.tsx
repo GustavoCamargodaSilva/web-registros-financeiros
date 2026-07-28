@@ -169,3 +169,29 @@ export function IconClose(props: IconProps) {
     </BaseIcon>
   )
 }
+
+/** Tema claro — exibido quando o tema escuro está ativo */
+export function IconSun(props: IconProps) {
+  return (
+    <BaseIcon width="20" height="20" {...props}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 3v2" />
+      <path d="M12 19v2" />
+      <path d="M3 12h2" />
+      <path d="M19 12h2" />
+      <path d="m5.6 5.6 1.4 1.4" />
+      <path d="m17 17 1.4 1.4" />
+      <path d="m18.4 5.6-1.4 1.4" />
+      <path d="m7 17-1.4 1.4" />
+    </BaseIcon>
+  )
+}
+
+/** Tema escuro — exibido quando o tema claro está ativo */
+export function IconMoon(props: IconProps) {
+  return (
+    <BaseIcon width="20" height="20" {...props}>
+      <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" />
+    </BaseIcon>
+  )
+}

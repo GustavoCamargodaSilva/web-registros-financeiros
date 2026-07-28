@@ -12,11 +12,21 @@
  */
 
 :root {
+  /* Renderiza controles nativos (date picker, select, scrollbar) no tema certo */
+  color-scheme: light;
+
   /* Brand / primary */
   --color-brand: #0b5cad;
   --color-brand-hover: #094a8f;
   --color-primary: #0b5cad;
   --color-primary-hover: #094a8f;
+  /*
+   * Papel de TEXTO da marca, separado do papel de FUNDO (--color-primary).
+   * No claro os dois coincidem; no escuro o texto precisa clarear para ter
+   * contraste sobre a superfície, enquanto o fundo do botão precisa continuar
+   * escuro o bastante para manter o rótulo branco legível.
+   */
+  --color-primary-text: #0b5cad;
 
   /* Money semantics */
   --color-income: #28a745;
@@ -28,6 +38,15 @@
   --color-danger: #e74c3c;
   --color-secondary: #00a896;
 
+  /* Texto sobre fundos semânticos sólidos */
+  --color-on-primary: #ffffff;
+  --color-on-success: #ffffff;
+  --color-on-danger: #ffffff;
+
+  /* Hovers de botão */
+  --color-danger-hover: #c0392b;
+  --color-success-hover: #218838;
+
   /* Surfaces */
   --color-background: #eef1f6;
   --color-sidebar: #f4f6f9;
@@ -36,6 +55,48 @@
   --color-text: #2d3748;
   --color-text-muted: #718096;
   --color-header-text: #ffffff;
+
+  /* Superfícies derivadas */
+  --color-surface-subtle: rgba(238, 241, 246, 0.55);
+  --color-surface-hover: rgba(45, 55, 72, 0.04);
+  --color-table-header: rgba(238, 241, 246, 0.65);
+  --color-row-hover: rgba(11, 92, 173, 0.03);
+  --color-overlay: rgba(16, 24, 40, 0.45);
+  --color-scroll-hint: rgba(15, 23, 42, 0.09);
+
+  /* Realces translúcidos da marca */
+  --color-primary-soft: rgba(11, 92, 173, 0.08);
+  --color-focus-ring: rgba(11, 92, 173, 0.15);
+  --color-auth-glow: rgba(11, 92, 173, 0.18);
+
+  /* Ícones */
+  --color-icon: #5b6573;
+  --color-icon-muted: #9aa3af;
+
+  /* Elementos sobre o header azul */
+  --color-header-mark: rgba(255, 255, 255, 0.16);
+  --color-header-overlay: rgba(255, 255, 255, 0.12);
+  --color-header-border: rgba(255, 255, 255, 0.45);
+
+  /* Feedback — toast */
+  --color-success-bg: #e8f9f0;
+  --color-success-fg: #1a7f4b;
+  --color-success-border: #b8ebd0;
+  --color-danger-bg: #fdeeee;
+  --color-danger-fg: #b42318;
+  --color-danger-border: #f5c2c2;
+
+  /* Feedback — realces em tabela e alertas */
+  --color-success-soft: rgba(40, 167, 69, 0.06);
+  --color-success-outline: rgba(40, 167, 69, 0.45);
+  --color-danger-soft: rgba(231, 76, 60, 0.06);
+  --color-danger-surface: rgba(231, 76, 60, 0.1);
+
+  /* Badges */
+  --color-badge-success-bg: rgba(40, 167, 69, 0.12);
+  --color-badge-success-fg: #1e7e34;
+  --color-badge-warning-bg: rgba(240, 173, 78, 0.18);
+  --color-badge-warning-fg: #9a6700;
 
   /* Radius */
   --radius-sm: 6px;
@@ -76,6 +137,85 @@
   /* Elevation */
   --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+/*
+ * Tema escuro. O atributo data-theme é aplicado no <html> pelo ThemeContext e,
+ * antes disso, pelo script anti-FOUC do index.html.
+ *
+ * Só cores mudam aqui — espaçamento, raio e layout continuam vindo do :root.
+ */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-brand: #0a4a8c;
+  --color-brand-hover: #0d5aa8;
+  --color-primary: #1a6ec0;
+  --color-primary-hover: #2f81d2;
+  --color-primary-text: #6bb2ee;
+
+  --color-income: #4ade80;
+  --color-expense: #f87171;
+
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-secondary: #2dd4bf;
+
+  /* Verde e vermelho claros exigem texto escuro por cima */
+  --color-on-primary: #ffffff;
+  --color-on-success: #0d2818;
+  --color-on-danger: #2b0f0f;
+
+  --color-danger-hover: #ef5350;
+  --color-success-hover: #22c55e;
+
+  --color-background: #12161c;
+  --color-sidebar: #171c24;
+  --color-surface: #1a1f27;
+  --color-border: #2c333f;
+  --color-text: #e4e8ef;
+  --color-text-muted: #9aa5b6;
+  --color-header-text: #e8edf5;
+
+  --color-surface-subtle: rgba(255, 255, 255, 0.04);
+  --color-surface-hover: rgba(255, 255, 255, 0.06);
+  --color-table-header: rgba(255, 255, 255, 0.05);
+  --color-row-hover: rgba(107, 178, 238, 0.07);
+  --color-overlay: rgba(4, 7, 12, 0.66);
+  --color-scroll-hint: rgba(0, 0, 0, 0.35);
+
+  --color-primary-soft: rgba(107, 178, 238, 0.14);
+  --color-focus-ring: rgba(107, 178, 238, 0.28);
+  --color-auth-glow: rgba(26, 110, 192, 0.28);
+
+  --color-icon: #9aa5b6;
+  --color-icon-muted: #6b7686;
+
+  --color-header-mark: rgba(255, 255, 255, 0.14);
+  --color-header-overlay: rgba(255, 255, 255, 0.14);
+  --color-header-border: rgba(255, 255, 255, 0.38);
+
+  --color-success-bg: rgba(74, 222, 128, 0.14);
+  --color-success-fg: #86efac;
+  --color-success-border: rgba(74, 222, 128, 0.32);
+  --color-danger-bg: rgba(248, 113, 113, 0.14);
+  --color-danger-fg: #fca5a5;
+  --color-danger-border: rgba(248, 113, 113, 0.32);
+
+  --color-success-soft: rgba(74, 222, 128, 0.1);
+  --color-success-outline: rgba(74, 222, 128, 0.45);
+  --color-danger-soft: rgba(248, 113, 113, 0.1);
+  --color-danger-surface: rgba(248, 113, 113, 0.14);
+
+  --color-badge-success-bg: rgba(74, 222, 128, 0.16);
+  --color-badge-success-fg: #86efac;
+  --color-badge-warning-bg: rgba(251, 191, 36, 0.16);
+  --color-badge-warning-fg: #fcd34d;
+
+  /* Sombras claras somem no escuro; a elevação precisa de preto opaco */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
 }
 
 @media (max-width: 640px) {

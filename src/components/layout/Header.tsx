@@ -1,5 +1,6 @@
 import { useAuth } from '../../context/AuthContext'
 import { Button } from '../ui/Button'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import { IconMenu } from './NavIcons'
 import styles from './Header.module.css'
 
@@ -9,9 +10,19 @@ interface HeaderProps {
   menuOpen?: boolean
   /** id do drawer controlado, para o aria-controls. */
   menuControls?: string
+  /**
+   * No mobile o header não tem largura para o botão de tema sem truncar o nome
+   * da aplicação, então o AppShell o move para o rodapé do drawer.
+   */
+  showThemeToggle?: boolean
 }
 
-export function Header({ onMenuClick, menuOpen = false, menuControls }: HeaderProps) {
+export function Header({
+  onMenuClick,
+  menuOpen = false,
+  menuControls,
+  showThemeToggle = true,
+}: HeaderProps) {
   const { usuario, logout } = useAuth()
 
   return (
@@ -39,6 +50,7 @@ export function Header({ onMenuClick, menuOpen = false, menuControls }: HeaderPr
       </div>
 
       <div className={styles.actions}>
+        {showThemeToggle ? <ThemeToggle /> : null}
         <Button variant="ghost" onClick={() => void logout()}>
           Sair
         </Button>

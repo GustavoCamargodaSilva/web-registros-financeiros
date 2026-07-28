@@ -18,13 +18,13 @@
 }
 
 .button:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary-text);
   outline-offset: 2px;
 }
 
 .primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .primary:hover:not(:disabled) {
@@ -33,11 +33,11 @@
 
 .danger {
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-on-danger);
 }
 
 .danger:hover:not(:disabled) {
-  background: #c0392b;
+  background: var(--color-danger-hover);
 }
 
 .outline {
@@ -47,34 +47,34 @@
 }
 
 .outline:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--color-primary-text);
+  color: var(--color-primary-text);
 }
 
 .success {
   background: var(--color-success);
-  color: #fff;
+  color: var(--color-on-success);
 }
 
 .success:hover:not(:disabled) {
-  background: #218838;
+  background: var(--color-success-hover);
 }
 
 .ghost {
   background: transparent;
   color: var(--color-header-text);
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: var(--color-header-border);
   height: 36px;
 }
 
 .ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: #fff;
-  color: #fff;
+  background: var(--color-header-overlay);
+  border-color: var(--color-header-text);
+  color: var(--color-header-text);
 }
 
 .ghost:focus-visible {
-  outline-color: #fff;
+  outline-color: var(--color-header-text);
 }
 
 .icon {

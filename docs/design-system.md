@@ -29,14 +29,15 @@
 
 ## 3. Paleta (tokens)
 
-Usar sempre as variáveis CSS. Não hardcodar hex em páginas/componentes, exceto em overrides pontuais justificados.
+Usar sempre as variáveis CSS. **Nenhum hex ou `rgba()` literal é permitido em `*.module.css`** — o tema escuro depende disso: uma cor fixa não muda quando o tema troca e vira uma mancha clara sobre o fundo escuro. Os hex abaixo são os valores do tema claro; a seção 3.1 traz os equivalentes escuros.
 
-| Token | Hex | Uso |
+| Token | Hex (claro) | Uso |
 |-------|-----|-----|
 | `--color-brand` | `#0B5CAD` | Header top bar, marca, links ativos fortes |
 | `--color-brand-hover` | `#094A8F` | Hover de ações na marca |
-| `--color-primary` | `#0B5CAD` | Botão primário, foco, destaques de UI |
+| `--color-primary` | `#0B5CAD` | **Fundo** de botão primário e realces sólidos |
 | `--color-primary-hover` | `#094A8F` | Hover do primário |
+| `--color-primary-text` | `#0B5CAD` | **Texto, borda e anel de foco** da marca sobre superfície |
 | `--color-income` | `#28A745` | Receitas, saldos positivos, “realizado” a receber |
 | `--color-expense` | `#E74C3C` | Despesas, a pagar, valores de saída |
 | `--color-success` | `#28A745` | Feedback positivo / pago |
@@ -49,6 +50,35 @@ Usar sempre as variáveis CSS. Não hardcodar hex em páginas/componentes, excet
 | `--color-text` | `#2D3748` | Texto principal |
 | `--color-text-muted` | `#718096` | Labels, meta, placeholders |
 | `--color-header-text` | `#FFFFFF` | Texto/ícones no header azul |
+
+Tokens derivados, criados para que nada precise de cor literal:
+
+| Grupo | Tokens |
+|-------|--------|
+| Texto sobre fundo sólido | `--color-on-primary`, `--color-on-success`, `--color-on-danger` |
+| Hover de botão semântico | `--color-success-hover`, `--color-danger-hover` |
+| Superfícies derivadas | `--color-surface-subtle`, `--color-surface-hover`, `--color-table-header`, `--color-row-hover`, `--color-overlay`, `--color-scroll-hint` |
+| Realces da marca | `--color-primary-soft`, `--color-focus-ring`, `--color-auth-glow` |
+| Ícones | `--color-icon`, `--color-icon-muted` |
+| Sobre o header azul | `--color-header-mark`, `--color-header-overlay`, `--color-header-border` |
+| Toast e alertas | `--color-success-bg/fg/border`, `--color-danger-bg/fg/border`, `--color-success-soft`, `--color-success-outline`, `--color-danger-soft`, `--color-danger-surface` |
+| Badges | `--color-badge-success-bg/fg`, `--color-badge-warning-bg/fg` |
+
+### 3.1 Tema claro e escuro
+
+O tema é aplicado por `data-theme="light" \| "dark"` no `<html>`. O bloco `[data-theme='dark']` em `src/styles/tokens.css` sobrescreve **apenas cores** — espaçamento, raio e layout continuam vindo do `:root`.
+
+Pontos de atenção ao criar cor nova:
+
+- **Papel duplo do azul.** `--color-primary` é fundo (precisa ser escuro o bastante para o rótulo branco); `--color-primary-text` é texto e borda (precisa clarear no escuro para ter contraste com a superfície). Escolher pelo papel, não pelo tom.
+- **Verde e vermelho invertem o texto.** No escuro, `--color-success` e `--color-danger` ficam claros, então `--color-on-success` e `--color-on-danger` passam a ser tons escuros. Nunca escrever `color: #fff` sobre eles.
+- **Translúcidos brancos, não cinzas.** Realces do tipo `rgba(45, 55, 72, 0.04)` escurecem uma superfície clara, mas somem numa escura. No escuro os equivalentes usam branco com alfa baixo.
+- **Sombras precisam de preto opaco.** As sombras suaves do tema claro são invisíveis sobre fundo escuro; `--shadow-sm/md` são redefinidos no bloco escuro.
+- **`color-scheme`** é declarado nos dois temas para que date pickers, selects e barras de rolagem nativas acompanhem — sem isso o calendário do `input[type=date]` abre branco no escuro.
+
+O estado vive em `src/context/ThemeContext.tsx`, com três modos: `light`, `dark` e `system` (padrão). A preferência vai para o `localStorage` (e não `sessionStorage`, usado por token e ambiente) porque é conforto visual e deve sobreviver ao fechamento do navegador. Um script inline no `index.html` aplica o atributo antes do primeiro paint; sem ele a tela pisca branca ao carregar no escuro.
+
+O botão fica no header no desktop e no rodapé do drawer no mobile — no header de 360px ele truncaria o nome da aplicação. Nas telas de autenticação a moldura `AuthPage` o posiciona no canto superior direito.
 
 ### Regras semânticas de dinheiro
 
@@ -265,7 +295,9 @@ rolagem horizontal quando o cartão não fizer sentido.
 
 | Do | Don’t |
 |----|-------|
-| Usar tokens de `tokens.css` | Hex solto em CSS modules |
+| Usar tokens de `tokens.css` | Hex ou `rgba()` solto em CSS modules |
+| Escolher o token pelo papel (`--color-primary-text` para texto) | Reaproveitar `--color-primary` para tudo |
+| `--color-on-success` sobre fundo verde | `color: #fff` sobre fundo semântico |
 | Cards brancos no fundo cinza | Fundo branco flat sem hierarquia |
 | Vermelho/verde só para dinheiro/status | Colorir tudo de azul |
 | Menu accordion com clique na linha inteira | Só a setinha clicável |
@@ -276,7 +308,9 @@ rolagem horizontal quando o cartão não fizer sentido.
 
 ## 11. Checklist antes de merge de UI
 
-- [ ] Cores/espaços/raios vêm de tokens
+- [ ] Cores/espaços/raios vêm de tokens — zero hex/`rgba()` em `*.module.css`
+- [ ] Tela conferida nos dois temas, incluindo overlays, toasts e badges
+- [ ] Token de cor novo declarado no `:root` **e** no bloco `[data-theme='dark']`
 - [ ] Valores financeiros com semântica correta
 - [ ] Shell (header/sidebar/main) respeitado
 - [ ] Sem rolagem horizontal entre 320px e 1920px
