@@ -16,7 +16,7 @@ import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import type { MembroAmbiente } from '../types/membro.types'
 import type { Pagador } from '../types/pagador.types'
-import type { Receita } from '../types/receita.types'
+import type { Receita, TipoReceita } from '../types/receita.types'
 import { formatCompetencia, formatCurrency, formatDate, formatPercent } from '../utils/format'
 import { primeiroNome } from '../utils/nome'
 import { calcularResumoReceitas } from '../utils/receitasResumo'
@@ -27,6 +27,7 @@ interface FormState {
   valor: string
   pago: string
   dataPagamento: string
+  tipoReceita: TipoReceita | ''
   responsavelUsuarioId: string
 }
 
@@ -36,6 +37,7 @@ function buildInitialForm(usuarioId?: number): FormState {
     valor: '',
     pago: '',
     dataPagamento: '',
+    tipoReceita: '',
     responsavelUsuarioId: usuarioId != null ? String(usuarioId) : '',
   }
 }
@@ -46,9 +48,14 @@ function buildEditForm(receita: Receita): FormState {
     valor: String(receita.valor),
     pago: String(receita.pago),
     dataPagamento: receita.dataPagamento,
+    tipoReceita: receita.tipoReceita,
     responsavelUsuarioId:
       receita.responsavelUsuarioId != null ? String(receita.responsavelUsuarioId) : '',
   }
+}
+
+function labelTipoReceita(tipo: TipoReceita): string {
+  return tipo === 'FIXO' ? 'Fixo' : 'Variável'
 }
 
 export function ReceitasPage() {
@@ -133,7 +140,7 @@ export function ReceitasPage() {
     setForm(buildEditForm(receita))
   }
 
-  const validate = () => {
+  const validate = (isEdit: boolean) => {
     const nextErrors: Partial<Record<keyof FormState, string>> = {}
 
     if (!form.pagadorId) nextErrors.pagadorId = 'Pagador é obrigatório'
@@ -141,31 +148,35 @@ export function ReceitasPage() {
     if (!form.pago) nextErrors.pago = 'Status é obrigatório'
     if (!form.dataPagamento) nextErrors.dataPagamento = 'Data de pagamento é obrigatória'
     if (!form.responsavelUsuarioId) nextErrors.responsavelUsuarioId = 'Responsável é obrigatório'
+    if (!isEdit && !form.tipoReceita) nextErrors.tipoReceita = 'Tipo é obrigatório'
 
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
 
-  const payload = () => ({
-    pagadorId: Number(form.pagadorId),
-    valor: Number(form.valor),
-    pago: form.pago === 'true',
-    dataPagamento: form.dataPagamento,
-    responsavelUsuarioId: Number(form.responsavelUsuarioId),
-  })
-
   const handleSubmitCadastro = async (event: FormEvent) => {
     event.preventDefault()
-    if (!validate()) {
+    if (!validate(false) || !form.tipoReceita) {
       return
     }
 
     setLoading(true)
 
     try {
-      await receitasApi.cadastrar(payload())
+      await receitasApi.cadastrar({
+        pagadorId: Number(form.pagadorId),
+        valor: Number(form.valor),
+        pago: form.pago === 'true',
+        dataPagamento: form.dataPagamento,
+        tipoReceita: form.tipoReceita,
+        responsavelUsuarioId: Number(form.responsavelUsuarioId),
+      })
       fecharFormulario()
-      showSuccess('Receita cadastrada com sucesso')
+      showSuccess(
+        form.tipoReceita === 'FIXO'
+          ? 'Receita fixa cadastrada para 12 meses'
+          : 'Receita cadastrada com sucesso',
+      )
       await loadData()
     } catch (error) {
       handleError(error)
@@ -176,14 +187,20 @@ export function ReceitasPage() {
 
   const handleSubmitEdicao = async (event: FormEvent) => {
     event.preventDefault()
-    if (!receitaEmEdicao || !validate()) {
+    if (!receitaEmEdicao || !validate(true)) {
       return
     }
 
     setLoading(true)
 
     try {
-      await receitasApi.atualizar(receitaEmEdicao.id, payload())
+      await receitasApi.atualizar(receitaEmEdicao.id, {
+        pagadorId: Number(form.pagadorId),
+        valor: Number(form.valor),
+        pago: form.pago === 'true',
+        dataPagamento: form.dataPagamento,
+        responsavelUsuarioId: Number(form.responsavelUsuarioId),
+      })
       fecharFormulario()
       showSuccess('Receita atualizada com sucesso')
       await loadData()
@@ -194,6 +211,16 @@ export function ReceitasPage() {
     }
   }
 
+  const mensagemExclusao = (() => {
+    if (!deleteTarget) {
+      return ''
+    }
+    if (deleteTarget.tipoReceita === 'FIXO') {
+      return `Deseja excluir a receita de ${deleteTarget.pagadorDescricao}? Todas as ocorrências desta série serão removidas.`
+    }
+    return `Deseja excluir a receita de ${deleteTarget.pagadorDescricao}?`
+  })()
+
   const confirmDelete = async () => {
     if (!deleteTarget) {
       return
@@ -201,7 +228,14 @@ export function ReceitasPage() {
 
     try {
       await receitasApi.excluir(deleteTarget.id)
-      showSuccess('Receita excluída com sucesso')
+      showSuccess(
+        deleteTarget.tipoReceita === 'FIXO'
+          ? 'Série de receitas excluída com sucesso'
+          : 'Receita excluída com sucesso',
+      )
+      if (receitaEmEdicao?.id === deleteTarget.id) {
+        fecharFormulario()
+      }
       setDeleteTarget(null)
       await loadData()
     } catch (error) {
@@ -266,10 +300,43 @@ export function ReceitasPage() {
               Fechar
             </Button>
           </div>
+          {editando && receitaEmEdicao?.tipoReceita === 'FIXO' ? (
+            <p className={styles.editHint}>
+              Valor, pagador e responsável serão aplicados às demais ocorrências desta série. O
+              status pago e a data de pagamento valem só para esta competência.
+            </p>
+          ) : null}
           <form
             className={`${styles.form} ${styles.formGrid}`}
             onSubmit={editando ? handleSubmitEdicao : handleSubmitCadastro}
           >
+            {!editando ? (
+              <Select
+                label="Tipo"
+                name="tipoReceita"
+                value={form.tipoReceita}
+                error={errors.tipoReceita}
+                placeholder="Selecione"
+                options={[
+                  { value: 'FIXO', label: 'Fixo (repete 12 meses)' },
+                  { value: 'VARIAVEL', label: 'Variável (pontual)' },
+                ]}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    tipoReceita: event.target.value as TipoReceita | '',
+                  }))
+                }
+              />
+            ) : (
+              <Input
+                label="Tipo"
+                name="tipoReceita"
+                value={form.tipoReceita ? labelTipoReceita(form.tipoReceita) : ''}
+                disabled
+                readOnly
+              />
+            )}
             <Select
               label="Pagador"
               name="pagadorId"
@@ -439,7 +506,7 @@ export function ReceitasPage() {
       <Modal
         open={Boolean(deleteTarget)}
         title="Excluir receita"
-        message={`Deseja excluir a receita de ${deleteTarget?.pagadorDescricao}?`}
+        message={mensagemExclusao}
         confirmLabel="Excluir"
         variant="danger"
         onCancel={() => setDeleteTarget(null)}
