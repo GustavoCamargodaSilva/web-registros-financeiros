@@ -216,7 +216,7 @@ export function ReceitasPage() {
       return ''
     }
     if (deleteTarget.tipoReceita === 'FIXO') {
-      return `Deseja excluir a receita de ${deleteTarget.pagadorDescricao}? Todas as ocorrências desta série serão removidas.`
+      return `Deseja excluir a receita de ${deleteTarget.pagadorDescricao}? Serão removidas as ocorrências desta competência em diante. Meses anteriores permanecem intactos.`
     }
     return `Deseja excluir a receita de ${deleteTarget.pagadorDescricao}?`
   })()
@@ -230,7 +230,7 @@ export function ReceitasPage() {
       await receitasApi.excluir(deleteTarget.id)
       showSuccess(
         deleteTarget.tipoReceita === 'FIXO'
-          ? 'Série de receitas excluída com sucesso'
+          ? 'Receitas a partir desta competência excluídas com sucesso'
           : 'Receita excluída com sucesso',
       )
       if (receitaEmEdicao?.id === deleteTarget.id) {
@@ -302,8 +302,9 @@ export function ReceitasPage() {
           </div>
           {editando && receitaEmEdicao?.tipoReceita === 'FIXO' ? (
             <p className={styles.editHint}>
-              Valor, pagador e responsável serão aplicados às demais ocorrências desta série. O
-              status pago e a data de pagamento valem só para esta competência.
+              Valor, pagador e responsável serão aplicados a partir desta competência (meses
+              anteriores permanecem intactos). O status pago e a data de pagamento valem só para
+              esta competência.
             </p>
           ) : null}
           <form
