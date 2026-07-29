@@ -276,7 +276,10 @@ export function DespesasPage() {
     if (deleteTarget.tipoDespesa === 'UNICA') {
       return `Deseja excluir a despesa "${deleteTarget.descricao}"?`
     }
-    return `Deseja excluir a despesa "${deleteTarget.descricao}"? Todas as ocorrências desta série (fixa ou parcelada) serão removidas.`
+    if (deleteTarget.tipoDespesa === 'FIXO') {
+      return `Deseja excluir a despesa "${deleteTarget.descricao}"? Serão removidas as ocorrências desta competência em diante. Meses anteriores permanecem intactos.`
+    }
+    return `Deseja excluir a despesa "${deleteTarget.descricao}"? Todas as parcelas desta série serão removidas.`
   })()
 
   const confirmDelete = async () => {
@@ -292,11 +295,13 @@ export function DespesasPage() {
 
     try {
       await despesasApi.excluir(deleteTarget.id)
-      showSuccess(
+      const toastExclusao =
         deleteTarget.tipoDespesa === 'UNICA'
           ? 'Despesa excluída com sucesso'
-          : 'Série de despesas excluída com sucesso',
-      )
+          : deleteTarget.tipoDespesa === 'FIXO'
+            ? 'Despesas a partir desta competência excluídas com sucesso'
+            : 'Série de despesas excluída com sucesso'
+      showSuccess(toastExclusao)
       setDeleteTarget(null)
       if (excluindoSerieEditada) {
         fecharFormulario()
@@ -406,9 +411,16 @@ export function DespesasPage() {
               Fechar
             </Button>
           </div>
-          {editando && despesaEmEdicao.tipoDespesa !== 'UNICA' ? (
+          {editando && despesaEmEdicao.tipoDespesa === 'FIXO' ? (
             <p className={styles.editHint}>
-              Valor, descrição, categoria e responsável serão aplicados às demais ocorrências desta
+              Valor, descrição, categoria e responsável serão aplicados a partir desta competência
+              (meses anteriores permanecem intactos). O status pago e o vencimento valem só para esta
+              ocorrência.
+            </p>
+          ) : null}
+          {editando && despesaEmEdicao.tipoDespesa === 'VARIAVEL' ? (
+            <p className={styles.editHint}>
+              Valor, descrição, categoria e responsável serão aplicados a todas as parcelas desta
               série. O status pago vale só para esta competência.
             </p>
           ) : null}
