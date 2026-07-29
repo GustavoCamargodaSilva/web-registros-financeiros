@@ -1,5 +1,10 @@
 import { apiRequest } from './client'
-import type { Receita, ReceitaCompetenciaResponse, ReceitaRequest } from '../types/receita.types'
+import type {
+  Receita,
+  ReceitaCompetenciaResponse,
+  ReceitaRequest,
+  ReceitaUpdateRequest,
+} from '../types/receita.types'
 
 const BASE = '/api/v1/receitas'
 
@@ -8,7 +13,7 @@ export const receitasApi = {
     apiRequest<ReceitaCompetenciaResponse>(`${BASE}?ano=${ano}&mes=${mes}`),
   cadastrar: (data: ReceitaRequest) =>
     apiRequest<void>(BASE, { method: 'POST', body: JSON.stringify(data) }),
-  atualizar: (id: number, data: ReceitaRequest) =>
+  atualizar: (id: number, data: ReceitaUpdateRequest) =>
     apiRequest<Receita>(`${BASE}/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   atualizarPago: (id: number, pago: boolean) =>
     apiRequest<Receita>(`${BASE}/${id}/pago`, {
