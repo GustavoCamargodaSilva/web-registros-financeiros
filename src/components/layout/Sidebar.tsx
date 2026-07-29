@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { NavLink, useLocation, useNavigate } from 'react-router'
+import { NavLink, useLocation } from 'react-router'
 import { useAmbientePermissoes } from '../../hooks/useAmbientePermissoes'
 import {
   IconBank,
@@ -63,7 +63,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNavigate }: SidebarProps) {
-  const navigate = useNavigate()
   const { pathname } = useLocation()
   const { canManageMembros } = useAmbientePermissoes()
 
@@ -91,26 +90,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   }, [pathname, menuGroups])
 
   function handleGroupClick(group: MenuGroup) {
-    const isOpen = openGroups[group.id]
-    const defaultPath = group.children[0]?.to
-    const inGroup = isPathInGroup(pathname, group)
-
-    if (!isOpen) {
-      setOpenGroups((current) => ({ ...current, [group.id]: true }))
-      if (defaultPath && !inGroup) {
-        void navigate(defaultPath)
-        onNavigate?.()
-      }
-      return
-    }
-
-    if (!inGroup && defaultPath) {
-      void navigate(defaultPath)
-      onNavigate?.()
-      return
-    }
-
-    setOpenGroups((current) => ({ ...current, [group.id]: false }))
+    setOpenGroups((current) => ({
+      ...current,
+      [group.id]: !current[group.id],
+    }))
   }
 
   return (
