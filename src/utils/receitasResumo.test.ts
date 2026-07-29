@@ -12,6 +12,8 @@ function receita(
     dataPagamento: '2026-07-15',
     ano: 2026,
     mes: 7,
+    tipoReceita: 'VARIAVEL',
+    grupoRecorrencia: '00000000-0000-0000-0000-000000000001',
     responsavelUsuarioId: null,
     responsavelNome: null,
     ...partial,
