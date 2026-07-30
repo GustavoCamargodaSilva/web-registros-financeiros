@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { ambientesApi } from '../api/ambientes.api'
+import { cartoesApi } from '../api/cartoes.api'
 import { categoriasApi } from '../api/categorias.api'
 import { despesasApi } from '../api/despesas.api'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
@@ -14,6 +15,7 @@ import { useAuth } from '../context/AuthContext'
 import { useCompetencia } from '../context/CompetenciaContext'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
+import type { Cartao } from '../types/cartao.types'
 import type { Categoria } from '../types/categoria.types'
 import type { Despesa, EscopoDespesa, TipoDespesa } from '../types/despesa.types'
 import type { MembroAmbiente } from '../types/membro.types'
@@ -31,6 +33,7 @@ interface FormState {
   quantidadeParcelas: string
   pago: string
   categoriaId: string
+  cartaoId: string
   escopo: EscopoDespesa
   responsavelUsuarioId: string
 }
@@ -44,6 +47,7 @@ function buildInitialForm(usuarioId?: number): FormState {
     quantidadeParcelas: '',
     pago: '',
     categoriaId: '',
+    cartaoId: '',
     escopo: 'INDIVIDUAL',
     responsavelUsuarioId: usuarioId != null ? String(usuarioId) : '',
   }
@@ -64,6 +68,7 @@ function buildEditForm(despesa: Despesa): FormState {
     quantidadeParcelas: totalParcelas > 1 ? String(totalParcelas) : '',
     pago: despesa.pago ? 'true' : 'false',
     categoriaId: String(despesa.categoriaId),
+    cartaoId: String(despesa.cartaoId),
     escopo: despesa.escopo,
     responsavelUsuarioId:
       despesa.escopo === 'INDIVIDUAL' && despesa.responsavelUsuarioId != null
@@ -92,6 +97,7 @@ export function DespesasPage() {
   const { showSuccess, handleError } = useApiFeedback()
   const [despesas, setDespesas] = useState<Despesa[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
+  const [cartoes, setCartoes] = useState<Cartao[]>([])
   const [membros, setMembros] = useState<MembroAmbiente[]>([])
   const [form, setForm] = useState<FormState>(() => buildInitialForm(usuario?.id))
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
@@ -105,13 +111,16 @@ export function DespesasPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [despesasResponse, categoriasResponse, membrosResponse] = await Promise.all([
-        despesasApi.listarPorCompetencia(ano, mes),
-        categoriasApi.listar(),
-        ambientesApi.listarMembrosAtivo(),
-      ])
+      const [despesasResponse, categoriasResponse, cartoesResponse, membrosResponse] =
+        await Promise.all([
+          despesasApi.listarPorCompetencia(ano, mes),
+          categoriasApi.listar(),
+          cartoesApi.listar(),
+          ambientesApi.listarMembrosAtivo(),
+        ])
       setDespesas(despesasResponse)
       setCategorias(categoriasResponse)
+      setCartoes(cartoesResponse)
       setMembros(membrosResponse)
     } catch (error) {
       handleError(error)
@@ -186,6 +195,7 @@ export function DespesasPage() {
     if (!isEdit && !form.tipoDespesa) nextErrors.tipoDespesa = 'Tipo é obrigatório'
     if (!form.pago) nextErrors.pago = 'Status é obrigatório'
     if (!form.categoriaId) nextErrors.categoriaId = 'Categoria é obrigatória'
+    if (!form.cartaoId) nextErrors.cartaoId = 'Cartão é obrigatório'
     if (!form.escopo) nextErrors.escopo = 'Escopo é obrigatório'
     if (form.escopo === 'INDIVIDUAL' && !form.responsavelUsuarioId) {
       nextErrors.responsavelUsuarioId = 'Responsável é obrigatório'
@@ -218,6 +228,7 @@ export function DespesasPage() {
         tipoDespesa: form.tipoDespesa as TipoDespesa,
         pago: form.pago === 'true',
         categoriaId: Number(form.categoriaId),
+        cartaoId: Number(form.cartaoId),
         quantidadeParcelas:
           form.tipoDespesa === 'VARIAVEL' ? Number(form.quantidadeParcelas) : undefined,
         escopo: form.escopo,
@@ -249,6 +260,7 @@ export function DespesasPage() {
         vencimento: form.vencimento,
         pago: form.pago === 'true',
         categoriaId: Number(form.categoriaId),
+        cartaoId: Number(form.cartaoId),
         escopo: form.escopo,
         responsavelUsuarioId:
           form.escopo === 'INDIVIDUAL' ? Number(form.responsavelUsuarioId) : null,
@@ -413,15 +425,15 @@ export function DespesasPage() {
           </div>
           {editando && despesaEmEdicao.tipoDespesa === 'FIXO' ? (
             <p className={styles.editHint}>
-              Valor, descrição, categoria e responsável serão aplicados a partir desta competência
-              (meses anteriores permanecem intactos). O status pago e o vencimento valem só para esta
-              ocorrência.
+              Valor, descrição, categoria, cartão e responsável serão aplicados a partir desta
+              competência (meses anteriores permanecem intactos). O status pago e o vencimento valem
+              só para esta ocorrência.
             </p>
           ) : null}
           {editando && despesaEmEdicao.tipoDespesa === 'VARIAVEL' ? (
             <p className={styles.editHint}>
-              Valor, descrição, categoria e responsável serão aplicados a todas as parcelas desta
-              série. O status pago vale só para esta competência.
+              Valor, descrição, categoria, cartão e responsável serão aplicados a todas as parcelas
+              desta série. O status pago vale só para esta competência.
             </p>
           ) : null}
           <form
@@ -557,6 +569,18 @@ export function DespesasPage() {
               }))}
               onChange={(event) => setForm((current) => ({ ...current, categoriaId: event.target.value }))}
             />
+            <Select
+              label="Cartão"
+              name="cartaoId"
+              value={form.cartaoId}
+              error={errors.cartaoId}
+              placeholder="Selecione"
+              options={cartoes.map((cartao) => ({
+                value: cartao.id,
+                label: cartao.nome,
+              }))}
+              onChange={(event) => setForm((current) => ({ ...current, cartaoId: event.target.value }))}
+            />
             <div className={styles.formActions}>
               <Button type="button" variant="outline" onClick={fecharFormulario} disabled={loading}>
                 Cancelar
@@ -608,6 +632,14 @@ export function DespesasPage() {
                   ? 'Conjunta'
                   : row.responsavelNome?.trim() || undefined,
               render: (row) => labelResponsavel(row),
+            },
+            {
+              key: 'cartao',
+              header: 'Cartão',
+              width: '110px',
+              truncate: true,
+              title: (row) => row.cartaoNome,
+              render: (row) => row.cartaoNome ?? '-',
             },
             {
               key: 'parcela',
