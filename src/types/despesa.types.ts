@@ -10,6 +10,8 @@ export interface Despesa {
   tipoDespesa: TipoDespesa
   pago: boolean
   categoriaId: number
+  cartaoId: number
+  cartaoNome?: string
   ano: number
   mes: number
   numeroParcela?: number
@@ -27,6 +29,7 @@ export interface DespesaRequest {
   tipoDespesa: TipoDespesa
   pago: boolean
   categoriaId: number
+  cartaoId: number
   quantidadeParcelas?: number
   escopo: EscopoDespesa
   responsavelUsuarioId?: number | null
@@ -38,6 +41,7 @@ export interface DespesaUpdateRequest {
   vencimento: string
   pago: boolean
   categoriaId: number
+  cartaoId: number
   escopo: EscopoDespesa
   responsavelUsuarioId?: number | null
 }

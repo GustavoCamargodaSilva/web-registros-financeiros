@@ -6,6 +6,7 @@ import { ConvitesPage } from './pages/ConvitesPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegistroPage } from './pages/RegistroPage'
 import { CategoriasPage } from './pages/CategoriasPage'
+import { CartoesPage } from './pages/CartoesPage'
 import { DespesasPage } from './pages/DespesasPage'
 import { PagadoresPage } from './pages/PagadoresPage'
 import { ReceitasPage } from './pages/ReceitasPage'
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="despesas" element={<DespesasPage />} />
           <Route path="receitas" element={<ReceitasPage />} />
           <Route path="categorias" element={<CategoriasPage />} />
+          <Route path="cartoes" element={<CartoesPage />} />
           <Route path="pagadores" element={<PagadoresPage />} />
           <Route path="convites" element={<ConvitesPage />} />
         </Route>
