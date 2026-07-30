@@ -68,7 +68,7 @@ function buildEditForm(despesa: Despesa): FormState {
     quantidadeParcelas: totalParcelas > 1 ? String(totalParcelas) : '',
     pago: despesa.pago ? 'true' : 'false',
     categoriaId: String(despesa.categoriaId),
-    cartaoId: String(despesa.cartaoId),
+    cartaoId: despesa.cartaoId != null ? String(despesa.cartaoId) : '',
     escopo: despesa.escopo,
     responsavelUsuarioId:
       despesa.escopo === 'INDIVIDUAL' && despesa.responsavelUsuarioId != null
@@ -195,7 +195,6 @@ export function DespesasPage() {
     if (!isEdit && !form.tipoDespesa) nextErrors.tipoDespesa = 'Tipo é obrigatório'
     if (!form.pago) nextErrors.pago = 'Status é obrigatório'
     if (!form.categoriaId) nextErrors.categoriaId = 'Categoria é obrigatória'
-    if (!form.cartaoId) nextErrors.cartaoId = 'Cartão é obrigatório'
     if (!form.escopo) nextErrors.escopo = 'Escopo é obrigatório'
     if (form.escopo === 'INDIVIDUAL' && !form.responsavelUsuarioId) {
       nextErrors.responsavelUsuarioId = 'Responsável é obrigatório'
@@ -228,7 +227,7 @@ export function DespesasPage() {
         tipoDespesa: form.tipoDespesa as TipoDespesa,
         pago: form.pago === 'true',
         categoriaId: Number(form.categoriaId),
-        cartaoId: Number(form.cartaoId),
+        cartaoId: form.cartaoId ? Number(form.cartaoId) : null,
         quantidadeParcelas:
           form.tipoDespesa === 'VARIAVEL' ? Number(form.quantidadeParcelas) : undefined,
         escopo: form.escopo,
@@ -260,7 +259,7 @@ export function DespesasPage() {
         vencimento: form.vencimento,
         pago: form.pago === 'true',
         categoriaId: Number(form.categoriaId),
-        cartaoId: Number(form.cartaoId),
+        cartaoId: form.cartaoId ? Number(form.cartaoId) : null,
         escopo: form.escopo,
         responsavelUsuarioId:
           form.escopo === 'INDIVIDUAL' ? Number(form.responsavelUsuarioId) : null,
@@ -570,11 +569,11 @@ export function DespesasPage() {
               onChange={(event) => setForm((current) => ({ ...current, categoriaId: event.target.value }))}
             />
             <Select
-              label="Cartão"
+              label="Cartão (opcional)"
               name="cartaoId"
               value={form.cartaoId}
               error={errors.cartaoId}
-              placeholder="Selecione"
+              placeholder="Sem cartão"
               options={cartoes.map((cartao) => ({
                 value: cartao.id,
                 label: cartao.nome,
@@ -638,7 +637,7 @@ export function DespesasPage() {
               header: 'Cartão',
               width: '110px',
               truncate: true,
-              title: (row) => row.cartaoNome,
+              title: (row) => row.cartaoNome ?? undefined,
               render: (row) => row.cartaoNome ?? '-',
             },
             {
