@@ -34,6 +34,7 @@ const baseMenuGroups: MenuGroup[] = [
     children: [
       { to: '/despesas', label: 'Cadastro', icon: <IconList /> },
       { to: '/categorias', label: 'Categorias', icon: <IconTags /> },
+      { to: '/cartoes', label: 'Cartão', icon: <IconWallet /> },
     ],
   },
   {

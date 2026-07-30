@@ -6,6 +6,7 @@ const titles: Record<string, string> = {
   '/despesas': 'Cadastro de despesas',
   '/receitas': 'Cadastro de receitas',
   '/categorias': 'Categorias',
+  '/cartoes': 'Cartão',
   '/pagadores': 'Pagadores',
   '/convites': 'Convites',
 }
