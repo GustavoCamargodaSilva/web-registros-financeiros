@@ -10,6 +10,7 @@ function despesa(partial: Partial<Despesa> & Pick<Despesa, 'id' | 'escopo'>): De
     tipoDespesa: 'FIXO',
     pago: false,
     categoriaId: 1,
+    cartaoId: 1,
     ano: 2026,
     mes: 7,
     responsavelUsuarioId: null,
