@@ -637,7 +637,7 @@ export function DespesasPage() {
               header: 'Cartão',
               width: '110px',
               truncate: true,
-              title: (row) => row.cartaoNome,
+              title: (row) => row.cartaoNome ?? undefined,
               render: (row) => row.cartaoNome ?? '-',
             },
             {
