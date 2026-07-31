@@ -4,6 +4,7 @@ import { consumeAuthMessage } from '../api/authMessage'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
+import { PasswordInput } from '../components/ui/PasswordInput'
 import { useAuth } from '../context/AuthContext'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import { buildAuthPath, getSafeReturnUrl } from '../utils/returnUrl'
@@ -71,10 +72,9 @@ export function LoginPage() {
             autoComplete="username"
             onChange={(event) => setLoginField(event.target.value)}
           />
-          <Input
+          <PasswordInput
             label="Senha"
             name="senha"
-            type="password"
             value={senha}
             error={errors.senha}
             autoComplete="current-password"
