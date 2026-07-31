@@ -80,7 +80,7 @@ export function LoginPage() {
             autoComplete="current-password"
             onChange={(event) => setSenha(event.target.value)}
           />
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" loading={loading}>
             Entrar
           </Button>
         </form>

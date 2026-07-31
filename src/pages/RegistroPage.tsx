@@ -116,7 +116,7 @@ export function RegistroPage() {
             autoComplete="new-password"
             onChange={(event) => setForm((current) => ({ ...current, senha: event.target.value }))}
           />
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" loading={loading}>
             Cadastrar
           </Button>
         </form>
