@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  Bar,
-  BarChart,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { categoriasApi } from '../api/categorias.api'
 import { despesasApi } from '../api/despesas.api'
 import { receitasApi } from '../api/receitas.api'
@@ -23,19 +13,8 @@ import { calcularResumoDespesas } from '../utils/despesasResumo'
 import { formatCurrency } from '../utils/format'
 import { calcularBalancoMes } from '../utils/homeBalanco'
 import { calcularGastosPorCategoria } from '../utils/homeGastosPorCategoria'
+import { HomeDespesasPorCategoria } from './HomeDespesasPorCategoria'
 import styles from './home.module.css'
-
-const CATEGORY_COLORS = [
-  '#3b82f6',
-  '#22c55e',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#06b6d4',
-  '#ec4899',
-  '#84cc16',
-  '#64748b',
-]
 
 function barWidthPercent(value: number, max: number): number {
   if (max <= 0) return 0
@@ -79,11 +58,6 @@ export function HomePage() {
   )
   const resumoDespesas = useMemo(() => calcularResumoDespesas(despesas), [despesas])
   const balancoMax = Math.max(balanco.totalEntradas, balanco.totalSaidas, 1)
-
-  const donutData = porCategoria.map((item, index) => ({
-    ...item,
-    fill: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
-  }))
 
   const individuaisData = resumoDespesas.porResponsavel.map((item) => ({
     nome: item.nome,
@@ -142,52 +116,7 @@ export function HomePage() {
         )}
       </Card>
 
-      <Card>
-        <h2 className={styles.sectionTitle}>Gastos por categoria</h2>
-        {donutData.length === 0 ? (
-          <p className={styles.empty}>Sem despesas para agrupar por categoria.</p>
-        ) : (
-          <div className={styles.categoryLayout}>
-            <div className={styles.chartWrap}>
-              <ResponsiveContainer width="100%" height={180}>
-                <PieChart>
-                  <Pie
-                    data={donutData}
-                    dataKey="total"
-                    nameKey="nome"
-                    innerRadius={48}
-                    outerRadius={72}
-                    paddingAngle={2}
-                  >
-                    {donutData.map((entry) => (
-                      <Cell key={entry.id} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => formatCurrency(Number(value ?? 0))}
-                    contentStyle={{
-                      background: 'var(--color-surface)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 8,
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <ul className={styles.legend}>
-              {donutData.map((item) => (
-                <li key={item.id} className={styles.legendItem}>
-                  <span className={styles.swatch} style={{ background: item.fill }} />
-                  <span className={styles.legendName}>{item.nome}</span>
-                  <span className={styles.legendValue}>
-                    {formatCurrency(item.total)} · {item.percentual.toFixed(1)}%
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </Card>
+      <HomeDespesasPorCategoria itens={porCategoria} />
 
       <Card>
         <h2 className={styles.sectionTitle}>Gastos individuais</h2>
