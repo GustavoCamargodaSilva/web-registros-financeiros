@@ -37,6 +37,17 @@ export function IconCaret({ open }: { open: boolean }) {
   )
 }
 
+/** Home / início */
+export function IconHome(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6.5 10.5V20h11V10.5" />
+      <path d="M10 20v-5h4v5" />
+    </BaseIcon>
+  )
+}
+
 /** Despesas / saída */
 export function IconWallet(props: IconProps) {
   return (

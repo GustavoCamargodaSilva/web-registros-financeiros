@@ -4,6 +4,7 @@ import { useAmbientePermissoes } from '../../hooks/useAmbientePermissoes'
 import {
   IconBank,
   IconCaret,
+  IconHome,
   IconList,
   IconMail,
   IconTags,
@@ -25,6 +26,8 @@ interface MenuGroup {
   icon: ReactNode
   children: MenuChild[]
 }
+
+const topLinks: MenuChild[] = [{ to: '/home', label: 'Home', icon: <IconHome /> }]
 
 const baseMenuGroups: MenuGroup[] = [
   {
@@ -100,6 +103,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   return (
     <nav className={styles.sidebar} aria-label="Menu principal">
       <div className={styles.nav}>
+        {topLinks.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            end
+            onClick={() => onNavigate?.()}
+            className={({ isActive }) =>
+              [styles.topLink, isActive ? styles.active : ''].filter(Boolean).join(' ')
+            }
+          >
+            <span className={styles.topLinkSpacer} aria-hidden />
+            <span className={styles.icon}>{link.icon}</span>
+            <span className={styles.itemLabel}>{link.label}</span>
+          </NavLink>
+        ))}
+
         {menuGroups.map((group) => {
           const isOpen = Boolean(openGroups[group.id])
           const groupActive = isPathInGroup(pathname, group)

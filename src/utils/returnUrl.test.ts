@@ -3,9 +3,9 @@ import { buildAuthPath, getSafeReturnUrl } from './returnUrl'
 
 describe('getSafeReturnUrl', () => {
   it('usa fallback quando vazio', () => {
-    expect(getSafeReturnUrl(null)).toBe('/despesas')
-    expect(getSafeReturnUrl(undefined)).toBe('/despesas')
-    expect(getSafeReturnUrl('')).toBe('/despesas')
+    expect(getSafeReturnUrl(null)).toBe('/home')
+    expect(getSafeReturnUrl(undefined)).toBe('/home')
+    expect(getSafeReturnUrl('')).toBe('/home')
   })
 
   it('aceita path interno com query', () => {
@@ -13,8 +13,8 @@ describe('getSafeReturnUrl', () => {
   })
 
   it('rejeita open redirect', () => {
-    expect(getSafeReturnUrl('https://evil.com')).toBe('/despesas')
-    expect(getSafeReturnUrl('//evil.com')).toBe('/despesas')
+    expect(getSafeReturnUrl('https://evil.com')).toBe('/home')
+    expect(getSafeReturnUrl('//evil.com')).toBe('/home')
   })
 })
 
