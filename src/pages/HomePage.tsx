@@ -14,6 +14,7 @@ import { formatCurrency } from '../utils/format'
 import { calcularBalancoMes } from '../utils/homeBalanco'
 import { calcularGastosPorCategoria } from '../utils/homeGastosPorCategoria'
 import { HomeDespesasPorCategoria } from './HomeDespesasPorCategoria'
+import { HomeRankingCategorias } from './HomeRankingCategorias'
 import styles from './home.module.css'
 
 function barWidthPercent(value: number, max: number): number {
@@ -117,6 +118,8 @@ export function HomePage() {
       </Card>
 
       <HomeDespesasPorCategoria itens={porCategoria} />
+
+      <HomeRankingCategorias itens={porCategoria} />
 
       <Card>
         <h2 className={styles.sectionTitle}>Gastos individuais</h2>

@@ -15,6 +15,24 @@ export function formatPercent(value: number): string {
   })}%`
 }
 
+/**
+ * Tick de eixo em escala compacta pt-BR: `800`, `1 mil`, `1,2 mil`.
+ * Não usa moeda — só para eixos de gráfico.
+ */
+export function formatEixoCompacto(valor: number): string {
+  const abs = Math.abs(valor)
+  if (abs < 1000) {
+    return Math.round(valor).toLocaleString('pt-BR')
+  }
+
+  const milhares = valor / 1000
+  const formatted = milhares.toLocaleString('pt-BR', {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0,
+  })
+  return `${formatted} mil`
+}
+
 export function formatDate(isoDate: string): string {
   const [year, month, day] = isoDate.split('-')
   return `${day}/${month}/${year}`

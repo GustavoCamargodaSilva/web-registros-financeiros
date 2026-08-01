@@ -1,21 +1,10 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { Card } from '../components/ui/Card'
 import { formatCurrency } from '../utils/format'
+import { CATEGORY_COLORS } from '../utils/homeCategoryColors'
 import type { GastoPorCategoria } from '../utils/homeGastosPorCategoria'
 import { limitarCategoriasParaDonut } from '../utils/limitarCategoriasParaDonut'
 import styles from './HomeDespesasPorCategoria.module.css'
-
-const CATEGORY_COLORS = [
-  '#60a5fa',
-  '#a78bfa',
-  '#fbbf24',
-  '#1e3a8a',
-  '#6366f1',
-  '#06b6d4',
-  '#ec4899',
-  '#84cc16',
-  '#64748b',
-]
 
 const LABEL_MIN_PERCENT = 0.05
 
