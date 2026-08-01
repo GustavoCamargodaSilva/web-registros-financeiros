@@ -1,7 +1,9 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# npm install (não ci): o lock gerado no Windows/npm 11 pode divergir em
+# optional deps (@emnapi/*) do npm 10 do Alpine, quebrando o deploy.
+RUN npm install --no-audit --no-fund
 COPY . .
 RUN npm run build
 
