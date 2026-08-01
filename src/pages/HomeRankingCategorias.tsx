@@ -66,6 +66,7 @@ export function HomeRankingCategorias({ itens }: HomeRankingCategoriasProps) {
                   tickLine={false}
                 />
                 <Tooltip
+                  cursor={false}
                   formatter={(value, _name, item) => [
                     formatCurrency(Number(value ?? 0)),
                     String(item?.payload?.nome ?? ''),
