@@ -102,6 +102,7 @@ export function DespesasPage() {
   const [form, setForm] = useState<FormState>(() => buildInitialForm(usuario?.id))
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(true)
   const [formAberto, setFormAberto] = useState(false)
   const [despesaEmEdicao, setDespesaEmEdicao] = useState<Despesa | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Despesa | null>(null)
@@ -109,7 +110,10 @@ export function DespesasPage() {
   const [filtroEscopo, setFiltroEscopo] = useState<FiltroEscopoDespesa>('TODOS')
   const [filtroResponsavelId, setFiltroResponsavelId] = useState('')
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (mode: 'full' | 'background' = 'full') => {
+    if (mode === 'full') {
+      setListLoading(true)
+    }
     try {
       const [despesasResponse, categoriasResponse, cartoesResponse, membrosResponse] =
         await Promise.all([
@@ -124,6 +128,10 @@ export function DespesasPage() {
       setMembros(membrosResponse)
     } catch (error) {
       handleError(error)
+    } finally {
+      if (mode === 'full') {
+        setListLoading(false)
+      }
     }
   }, [ano, mes, handleError])
 
@@ -236,7 +244,7 @@ export function DespesasPage() {
       })
       fecharFormulario()
       showSuccess('Despesa cadastrada com sucesso')
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -245,6 +253,7 @@ export function DespesasPage() {
   }
 
   const handleSubmitEdicao = async (event: FormEvent) => {
+
     event.preventDefault()
     if (!despesaEmEdicao || !validate(true)) {
       return
@@ -266,7 +275,7 @@ export function DespesasPage() {
       })
       fecharFormulario()
       showSuccess('Despesa atualizada com sucesso')
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -317,7 +326,7 @@ export function DespesasPage() {
       if (excluindoSerieEditada) {
         fecharFormulario()
       }
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     }
@@ -329,7 +338,7 @@ export function DespesasPage() {
     try {
       await despesasApi.atualizarPago(despesa.id, novoPago)
       showSuccess(novoPago ? 'Despesa marcada como paga' : 'Despesa marcada como pendente')
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -584,7 +593,7 @@ export function DespesasPage() {
               <Button type="button" variant="outline" onClick={fecharFormulario} disabled={loading}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" disabled={loading}>
+              <Button type="submit" variant="primary" loading={loading}>
                 {editando ? 'Salvar' : 'Cadastrar'}
               </Button>
             </div>
@@ -595,6 +604,7 @@ export function DespesasPage() {
       <Card title="Despesas do mês">
         <DataTable
           data={despesasFiltradas}
+          loading={listLoading}
           emptyMessage="Nenhuma despesa neste mês. Cadastre a primeira."
           columns={[
             {

@@ -66,4 +66,16 @@ describe('DataTable', () => {
 
     expect(screen.getByText('Nada aqui.')).toBeInTheDocument()
   })
+
+  it('com loading não mostra empty state nem dados', () => {
+    setViewportWidth(1280)
+
+    render(
+      <DataTable data={[]} columns={columns} loading emptyMessage="Nada aqui." />,
+    )
+
+    expect(screen.queryByText('Nada aqui.')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Carregando')).toBeInTheDocument()
+    expect(screen.getByText('Nome')).toBeInTheDocument()
+  })
 })

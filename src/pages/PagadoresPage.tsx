@@ -18,13 +18,21 @@ export function PagadoresPage() {
   const [descricao, setDescricao] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Pagador | null>(null)
 
-  const loadPagadores = useCallback(async () => {
+  const loadPagadores = useCallback(async (mode: 'full' | 'background' = 'full') => {
+    if (mode === 'full') {
+      setListLoading(true)
+    }
     try {
       setPagadores(await pagadoresApi.listar())
     } catch (error) {
       handleError(error)
+    } finally {
+      if (mode === 'full') {
+        setListLoading(false)
+      }
     }
   }, [handleError])
 
@@ -56,7 +64,7 @@ export function PagadoresPage() {
       await pagadoresApi.cadastrar({ descricao: trimmed })
       setDescricao('')
       showSuccess('Pagador cadastrado com sucesso')
-      await loadPagadores()
+      void loadPagadores('background')
     } catch (submitError) {
       handleError(submitError)
     } finally {
@@ -73,7 +81,7 @@ export function PagadoresPage() {
       await pagadoresApi.excluir(deleteTarget.id)
       showSuccess('Pagador excluído com sucesso')
       setDeleteTarget(null)
-      await loadPagadores()
+      void loadPagadores('background')
     } catch (deleteError) {
       handleError(deleteError)
     }
@@ -127,7 +135,7 @@ export function PagadoresPage() {
               onChange={(event) => setDescricao(event.target.value)}
             />
             <div className={styles.actions}>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" loading={loading}>
                 Cadastrar
               </Button>
             </div>
@@ -138,7 +146,7 @@ export function PagadoresPage() {
       )}
 
       <Card title="Pagadores cadastrados">
-        <DataTable data={pagadores} columns={columns} />
+        <DataTable data={pagadores} columns={columns} loading={listLoading} />
       </Card>
 
       <Modal
