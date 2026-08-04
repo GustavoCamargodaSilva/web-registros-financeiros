@@ -22,6 +22,41 @@ function barWidthPercent(value: number, max: number): number {
   return Math.max(4, Math.round((value / max) * 100))
 }
 
+function HomeSkeleton() {
+  return (
+    <div
+      className={`${styles.grid} ${styles.gridTwo}`}
+      aria-busy="true"
+      aria-label="Carregando visão do mês"
+    >
+      <Card>
+        <h2 className={styles.sectionTitle}>Renda e gastos</h2>
+        <span className={`skeleton ${styles.skeletonBar}`} />
+        <span className={`skeleton ${styles.skeletonBar}`} />
+      </Card>
+      <Card>
+        <h2 className={styles.sectionTitle}>Gastos em conjunto</h2>
+        <span className={`skeleton ${styles.skeletonValue}`} />
+        <span className={`skeleton ${styles.skeletonHint}`} />
+      </Card>
+      <Card>
+        <h2 className={styles.sectionTitle}>Despesas por categoria</h2>
+        <span className={`skeleton ${styles.skeletonChart}`} />
+      </Card>
+      <Card>
+        <h2 className={styles.sectionTitle}>Ranking de categorias</h2>
+        <span className={`skeleton ${styles.skeletonBar}`} />
+        <span className={`skeleton ${styles.skeletonBar}`} />
+        <span className={`skeleton ${styles.skeletonBar}`} />
+      </Card>
+      <Card>
+        <h2 className={styles.sectionTitle}>Gastos individuais</h2>
+        <span className={`skeleton ${styles.skeletonChart}`} />
+      </Card>
+    </div>
+  )
+}
+
 export function HomePage() {
   const { ano, mes } = useCompetencia()
   const { handleError } = useApiFeedback()
@@ -29,6 +64,7 @@ export function HomePage() {
   const [receitas, setReceitas] = useState<Receita[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(true)
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -41,6 +77,7 @@ export function HomePage() {
       setDespesas(despesasResponse)
       setReceitas(receitasResponse.receitas)
       setCategorias(categoriasResponse)
+      setHasLoadedOnce(true)
     } catch (error) {
       handleError(error)
     } finally {
@@ -65,12 +102,21 @@ export function HomePage() {
     total: item.total,
   }))
 
-  if (loading) {
-    return <p className={styles.loading}>Carregando visão do mês…</p>
+  if (loading && !hasLoadedOnce) {
+    return <HomeSkeleton />
   }
 
   return (
-    <div className={`${styles.grid} ${styles.gridTwo}`}>
+    <div
+      className={`${styles.grid} ${styles.gridTwo}`}
+      aria-busy={loading || undefined}
+    >
+      {loading ? (
+        <p className={styles.refreshHint} role="status">
+          Atualizando competência…
+        </p>
+      ) : null}
+
       <Card>
         <h2 className={styles.sectionTitle}>Renda e gastos</h2>
         {balanco.totalEntradas === 0 && balanco.totalSaidas === 0 ? (

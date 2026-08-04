@@ -48,6 +48,7 @@ export function ConvitesPage() {
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(true)
   const [ambienteAtivo, setAmbienteAtivo] = useState<Ambiente | null>(null)
   const [membros, setMembros] = useState<MembroAmbiente[]>([])
   const [removeTarget, setRemoveTarget] = useState<MembroAmbiente | null>(null)
@@ -55,7 +56,10 @@ export function ConvitesPage() {
 
   const isDono = ambienteAtivo?.papel === 'DONO'
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (mode: 'full' | 'background' = 'full') => {
+    if (mode === 'full') {
+      setListLoading(true)
+    }
     try {
       const [ambientes, membrosResponse] = await Promise.all([
         ambientesApi.listar(),
@@ -69,6 +73,10 @@ export function ConvitesPage() {
       setMembros(membrosResponse)
     } catch (error) {
       handleError(error)
+    } finally {
+      if (mode === 'full') {
+        setListLoading(false)
+      }
     }
   }, [handleError])
 
@@ -105,7 +113,7 @@ export function ConvitesPage() {
       })
       setEmail('')
       showSuccess(`Convite enviado para ${response.emailConvidado}`)
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -123,7 +131,7 @@ export function ConvitesPage() {
       await ambientesApi.removerMembro(removeTarget.usuarioId)
       showSuccess(`Acesso de ${primeiroNome(removeTarget.nome)} removido`)
       setRemoveTarget(null)
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -131,7 +139,7 @@ export function ConvitesPage() {
     }
   }
 
-  if (ambienteAtivo && !isDono) {
+  if (!listLoading && ambienteAtivo && !isDono) {
     return <Navigate to="/despesas" replace />
   }
 
@@ -176,7 +184,7 @@ export function ConvitesPage() {
             }}
           />
           <div className={styles.formActions}>
-            <Button type="submit" variant="primary" disabled={!isDono || loading}>
+            <Button type="submit" variant="primary" loading={loading} disabled={!isDono}>
               Enviar convite
             </Button>
           </div>
@@ -186,6 +194,7 @@ export function ConvitesPage() {
       <Card title="Membros do ambiente">
         <DataTable
           data={membros}
+          loading={listLoading}
           emptyMessage="Nenhum membro neste ambiente."
           columns={[
             {

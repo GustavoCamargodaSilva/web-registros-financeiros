@@ -37,7 +37,11 @@ interface DataTableProps<T> {
    * `scroll` mantém a tabela com rolagem horizontal.
    */
   mobileMode?: 'cards' | 'scroll'
+  /** Quando true, mostra skeleton em vez de empty state ou dados. */
+  loading?: boolean
 }
+
+const SKELETON_ROWS = 5
 
 function cellClassName<T>(column: DataTableColumn<T>) {
   return [
@@ -55,13 +59,83 @@ function sortDetails<T>(columns: DataTableColumn<T>[]) {
   ]
 }
 
+function DataTableSkeleton<T>({
+  columns,
+  mobileMode,
+  isMobile,
+}: {
+  columns: DataTableColumn<T>[]
+  mobileMode: 'cards' | 'scroll'
+  isMobile: boolean
+}) {
+  if (isMobile && mobileMode === 'cards') {
+    return (
+      <ul className={styles.cards} aria-busy="true" aria-label="Carregando">
+        {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+          <li key={index} className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={`skeleton ${styles.skeletonPrimary}`} />
+              <span className={`skeleton ${styles.skeletonSecondary}`} />
+            </div>
+            <div className={styles.cardBody}>
+              <span className={`skeleton ${styles.skeletonLine}`} />
+              <span className={`skeleton ${styles.skeletonLineShort}`} />
+            </div>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  const wrapperClass = [styles.wrapper, mobileMode === 'scroll' ? styles.wrapperHint : '']
+    .filter(Boolean)
+    .join(' ')
+
+  return (
+    <div className={wrapperClass} aria-busy="true" aria-label="Carregando">
+      <table className={styles.table}>
+        <colgroup>
+          {columns.map((column) => (
+            <col key={column.key} style={column.width ? { width: column.width } : undefined} />
+          ))}
+        </colgroup>
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th key={column.key} className={cellClassName(column) || undefined}>
+                {column.header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: SKELETON_ROWS }, (_, rowIndex) => (
+            <tr key={rowIndex}>
+              {columns.map((column) => (
+                <td key={column.key} className={cellClassName(column) || undefined}>
+                  <span className={`skeleton ${styles.skeletonCell}`} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export function DataTable<T>({
   columns,
   data,
   emptyMessage = 'Nenhum registro encontrado.',
   mobileMode = 'cards',
+  loading = false,
 }: DataTableProps<T>) {
   const { isMobile } = useBreakpoint()
+
+  if (loading) {
+    return <DataTableSkeleton columns={columns} mobileMode={mobileMode} isMobile={isMobile} />
+  }
 
   if (data.length === 0) {
     return <div className={styles.empty}>{emptyMessage}</div>

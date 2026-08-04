@@ -18,13 +18,21 @@ export function CategoriasPage() {
   const [descricao, setDescricao] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Categoria | null>(null)
 
-  const loadCategorias = useCallback(async () => {
+  const loadCategorias = useCallback(async (mode: 'full' | 'background' = 'full') => {
+    if (mode === 'full') {
+      setListLoading(true)
+    }
     try {
       setCategorias(await categoriasApi.listar())
     } catch (loadError) {
       handleError(loadError)
+    } finally {
+      if (mode === 'full') {
+        setListLoading(false)
+      }
     }
   }, [handleError])
 
@@ -56,7 +64,7 @@ export function CategoriasPage() {
       await categoriasApi.cadastrar({ descricao: trimmed })
       setDescricao('')
       showSuccess('Categoria cadastrada com sucesso')
-      await loadCategorias()
+      void loadCategorias('background')
     } catch (submitError) {
       handleError(submitError)
     } finally {
@@ -73,7 +81,7 @@ export function CategoriasPage() {
       await categoriasApi.excluir(deleteTarget.id)
       showSuccess('Categoria excluída com sucesso')
       setDeleteTarget(null)
-      await loadCategorias()
+      void loadCategorias('background')
     } catch (deleteError) {
       handleError(deleteError)
     }
@@ -127,7 +135,7 @@ export function CategoriasPage() {
               onChange={(event) => setDescricao(event.target.value)}
             />
             <div className={styles.actions}>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" loading={loading}>
                 Cadastrar
               </Button>
             </div>
@@ -138,7 +146,7 @@ export function CategoriasPage() {
       )}
 
       <Card title="Categorias cadastradas">
-        <DataTable data={categorias} columns={columns} />
+        <DataTable data={categorias} columns={columns} loading={listLoading} />
       </Card>
 
       <Modal

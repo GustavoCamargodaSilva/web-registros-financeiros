@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
+import { AmbienteProvider } from '../../context/AmbienteContext'
 import { useAuth } from '../../context/AuthContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { ThemeToggle } from '../ui/ThemeToggle'
@@ -29,57 +30,59 @@ export function AppShell() {
   }, [isMobile])
 
   return (
-    <div className={styles.shell}>
-      <header className={styles.header}>
-        <Header
-          onMenuClick={isMobile ? () => setDrawerOpen((open) => !open) : undefined}
-          menuOpen={drawerOpen}
-          menuControls={DRAWER_ID}
-          showThemeToggle={!isMobile}
-        />
-      </header>
+    <AmbienteProvider>
+      <div className={styles.shell}>
+        <header className={styles.header}>
+          <Header
+            onMenuClick={isMobile ? () => setDrawerOpen((open) => !open) : undefined}
+            menuOpen={drawerOpen}
+            menuControls={DRAWER_ID}
+            showThemeToggle={!isMobile}
+          />
+        </header>
 
-      {isMobile ? (
-        <Drawer
-          id={DRAWER_ID}
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          ariaLabel="Menu principal"
-        >
-          <div className={styles.drawerHead}>
-            {usuario ? (
-              <div className={styles.drawerUser}>
-                <span className={styles.drawerUserLabel}>Conectado como</span>
-                <span className={styles.drawerUserName}>{usuario.nome}</span>
-              </div>
-            ) : (
-              <span />
-            )}
-            <button
-              type="button"
-              className={styles.drawerClose}
-              onClick={() => setDrawerOpen(false)}
-              aria-label="Fechar menu"
-            >
-              <IconClose />
-            </button>
-          </div>
-          <Sidebar onNavigate={() => setDrawerOpen(false)} />
-          <div className={styles.drawerFooter}>
-            <span className={styles.drawerFooterLabel}>Tema</span>
-            <ThemeToggle variant="outline" />
-          </div>
-        </Drawer>
-      ) : (
-        <aside className={styles.sidebar}>
-          <Sidebar />
-        </aside>
-      )}
+        {isMobile ? (
+          <Drawer
+            id={DRAWER_ID}
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            ariaLabel="Menu principal"
+          >
+            <div className={styles.drawerHead}>
+              {usuario ? (
+                <div className={styles.drawerUser}>
+                  <span className={styles.drawerUserLabel}>Conectado como</span>
+                  <span className={styles.drawerUserName}>{usuario.nome}</span>
+                </div>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                className={styles.drawerClose}
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Fechar menu"
+              >
+                <IconClose />
+              </button>
+            </div>
+            <Sidebar onNavigate={() => setDrawerOpen(false)} />
+            <div className={styles.drawerFooter}>
+              <span className={styles.drawerFooterLabel}>Tema</span>
+              <ThemeToggle variant="outline" />
+            </div>
+          </Drawer>
+        ) : (
+          <aside className={styles.sidebar}>
+            <Sidebar />
+          </aside>
+        )}
 
-      <main className={styles.main}>
-        <PageHeader />
-        <Outlet />
-      </main>
-    </div>
+        <main className={styles.main}>
+          <PageHeader />
+          <Outlet />
+        </main>
+      </div>
+    </AmbienteProvider>
   )
 }

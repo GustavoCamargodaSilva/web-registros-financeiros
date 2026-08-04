@@ -69,12 +69,16 @@ export function ReceitasPage() {
   const [form, setForm] = useState<FormState>(() => buildInitialForm(usuario?.id))
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(true)
   const [formAberto, setFormAberto] = useState(false)
   const [receitaEmEdicao, setReceitaEmEdicao] = useState<Receita | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Receita | null>(null)
   const [pagoLoadingId, setPagoLoadingId] = useState<number | null>(null)
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (mode: 'full' | 'background' = 'full') => {
+    if (mode === 'full') {
+      setListLoading(true)
+    }
     try {
       const [receitasResponse, pagadoresResponse, membrosResponse] = await Promise.all([
         receitasApi.listarPorCompetencia(ano, mes),
@@ -86,6 +90,10 @@ export function ReceitasPage() {
       setMembros(membrosResponse)
     } catch (error) {
       handleError(error)
+    } finally {
+      if (mode === 'full') {
+        setListLoading(false)
+      }
     }
   }, [ano, mes, handleError])
 
@@ -177,7 +185,7 @@ export function ReceitasPage() {
           ? 'Receita fixa cadastrada para 12 meses'
           : 'Receita cadastrada com sucesso',
       )
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -203,7 +211,7 @@ export function ReceitasPage() {
       })
       fecharFormulario()
       showSuccess('Receita atualizada com sucesso')
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -237,7 +245,7 @@ export function ReceitasPage() {
         fecharFormulario()
       }
       setDeleteTarget(null)
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     }
@@ -249,7 +257,7 @@ export function ReceitasPage() {
     try {
       await receitasApi.atualizarPago(receita.id, novoPago)
       showSuccess(novoPago ? 'Receita marcada como paga' : 'Receita marcada como pendente')
-      await loadData()
+      void loadData('background')
     } catch (error) {
       handleError(error)
     } finally {
@@ -402,7 +410,7 @@ export function ReceitasPage() {
               <Button type="button" variant="outline" onClick={fecharFormulario} disabled={loading}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" disabled={loading}>
+              <Button type="submit" variant="primary" loading={loading}>
                 {editando ? 'Salvar' : 'Cadastrar'}
               </Button>
             </div>
@@ -413,6 +421,7 @@ export function ReceitasPage() {
       <Card title="Receitas do mês">
         <DataTable
           data={receitas}
+          loading={listLoading}
           emptyMessage="Nenhuma receita neste mês. Cadastre a primeira."
           columns={[
             {

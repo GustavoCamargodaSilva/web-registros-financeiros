@@ -18,13 +18,21 @@ export function CartoesPage() {
   const [nome, setNome] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Cartao | null>(null)
 
-  const loadCartoes = useCallback(async () => {
+  const loadCartoes = useCallback(async (mode: 'full' | 'background' = 'full') => {
+    if (mode === 'full') {
+      setListLoading(true)
+    }
     try {
       setCartoes(await cartoesApi.listar())
     } catch (loadError) {
       handleError(loadError)
+    } finally {
+      if (mode === 'full') {
+        setListLoading(false)
+      }
     }
   }, [handleError])
 
@@ -56,7 +64,7 @@ export function CartoesPage() {
       await cartoesApi.cadastrar({ nome: trimmed })
       setNome('')
       showSuccess('Cartão cadastrado com sucesso')
-      await loadCartoes()
+      void loadCartoes('background')
     } catch (submitError) {
       handleError(submitError)
     } finally {
@@ -73,7 +81,7 @@ export function CartoesPage() {
       await cartoesApi.excluir(deleteTarget.id)
       showSuccess('Cartão excluído com sucesso')
       setDeleteTarget(null)
-      await loadCartoes()
+      void loadCartoes('background')
     } catch (deleteError) {
       handleError(deleteError)
     }
@@ -128,7 +136,7 @@ export function CartoesPage() {
               onBlur={() => setNome((current) => current.trim().toUpperCase())}
             />
             <div className={styles.actions}>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" loading={loading}>
                 Cadastrar
               </Button>
             </div>
@@ -139,7 +147,7 @@ export function CartoesPage() {
       )}
 
       <Card title="Cartões cadastrados">
-        <DataTable data={cartoes} columns={columns} />
+        <DataTable data={cartoes} columns={columns} loading={listLoading} />
       </Card>
 
       <Modal
