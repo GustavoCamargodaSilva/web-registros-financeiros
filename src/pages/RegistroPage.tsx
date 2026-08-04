@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
+import { PasswordInput } from '../components/ui/PasswordInput'
 import { useAuth } from '../context/AuthContext'
 import { useApiFeedback } from '../hooks/useApiFeedback'
 import { SENHA_MAX_LENGTH, SENHA_MIN_LENGTH, validarSenha } from '../utils/senha'
@@ -104,10 +105,9 @@ export function RegistroPage() {
             error={errors.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
           />
-          <Input
+          <PasswordInput
             label="Senha"
             name="senha"
-            type="password"
             value={form.senha}
             error={errors.senha}
             hint={`Entre ${SENHA_MIN_LENGTH} e ${SENHA_MAX_LENGTH} caracteres`}
@@ -116,7 +116,7 @@ export function RegistroPage() {
             autoComplete="new-password"
             onChange={(event) => setForm((current) => ({ ...current, senha: event.target.value }))}
           />
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" loading={loading}>
             Cadastrar
           </Button>
         </form>

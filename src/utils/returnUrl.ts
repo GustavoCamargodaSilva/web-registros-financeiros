@@ -1,4 +1,4 @@
-const DEFAULT_RETURN_URL = '/despesas'
+const DEFAULT_RETURN_URL = '/home'
 
 /**
  * Aceita apenas paths internos relativos (evita open redirect).

@@ -3,6 +3,7 @@ import { CompetenciaSelector } from '../ui/CompetenciaSelector'
 import styles from './PageHeader.module.css'
 
 const titles: Record<string, string> = {
+  '/home': 'Home',
   '/despesas': 'Cadastro de despesas',
   '/receitas': 'Cadastro de receitas',
   '/categorias': 'Categorias',
@@ -14,7 +15,8 @@ const titles: Record<string, string> = {
 export function PageHeader() {
   const { pathname } = useLocation()
   const title = titles[pathname] ?? 'Registros Financeiros'
-  const showCompetencia = pathname === '/despesas' || pathname === '/receitas'
+  const showCompetencia =
+    pathname === '/home' || pathname === '/despesas' || pathname === '/receitas'
 
   return (
     <div className={styles.pageHeader}>
