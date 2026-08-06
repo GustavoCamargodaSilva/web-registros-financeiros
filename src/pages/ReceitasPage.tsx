@@ -272,6 +272,7 @@ export function ReceitasPage() {
       {
         key: 'pagador',
         header: 'Pagador',
+        width: '18%',
         truncate: true,
         priority: 'primary',
         title: (row) => row.pagadorDescricao,
@@ -280,6 +281,7 @@ export function ReceitasPage() {
       {
         key: 'responsavel',
         header: 'Responsável',
+        width: '16%',
         truncate: true,
         title: (row) => row.responsavelNome?.trim() || undefined,
         render: (row) => primeiroNome(row.responsavelNome),
@@ -287,7 +289,7 @@ export function ReceitasPage() {
       {
         key: 'valor',
         header: 'Valor',
-        align: 'right',
+        width: '14%',
         priority: 'primary',
         render: (row) => (
           <span className={styles.moneyIncome}>{formatCurrency(row.valor)}</span>
@@ -296,12 +298,13 @@ export function ReceitasPage() {
       {
         key: 'dataPagamento',
         header: 'Pagamento',
-        align: 'right',
+        width: '16%',
         render: (row) => formatDate(row.dataPagamento),
       },
       {
         key: 'pago',
         header: 'Status',
+        width: '16%',
         render: (row) => <Badge paid={row.pago} />,
       },
       ...(canWrite
@@ -309,6 +312,7 @@ export function ReceitasPage() {
             {
               key: 'actions',
               header: 'Ações',
+              width: '132px',
               priority: 'actions' as const,
               render: (row: Receita) => (
                 <div className={styles.tableActions}>
@@ -408,6 +412,33 @@ export function ReceitasPage() {
             className={`${styles.form} ${styles.formGrid}`}
             onSubmit={editando ? handleSubmitEdicao : handleSubmitCadastro}
           >
+            {!editando ? (
+              <Select
+                label="Tipo"
+                name="tipoReceita"
+                value={form.tipoReceita}
+                error={errors.tipoReceita}
+                placeholder="Selecione"
+                options={[
+                  { value: 'FIXO', label: 'Fixo (repete 12 meses)' },
+                  { value: 'VARIAVEL', label: 'Variável (pontual)' },
+                ]}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    tipoReceita: event.target.value as TipoReceita | '',
+                  }))
+                }
+              />
+            ) : (
+              <Input
+                label="Tipo"
+                name="tipoReceita"
+                value={form.tipoReceita ? labelTipoReceita(form.tipoReceita) : ''}
+                disabled
+                readOnly
+              />
+            )}
             <Select
               label="Pagador"
               name="pagadorId"
@@ -446,33 +477,6 @@ export function ReceitasPage() {
               error={errors.valor}
               onChange={(event) => setForm((current) => ({ ...current, valor: event.target.value }))}
             />
-            {!editando ? (
-              <Select
-                label="Tipo"
-                name="tipoReceita"
-                value={form.tipoReceita}
-                error={errors.tipoReceita}
-                placeholder="Selecione"
-                options={[
-                  { value: 'FIXO', label: 'Fixo (repete 12 meses)' },
-                  { value: 'VARIAVEL', label: 'Variável (pontual)' },
-                ]}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    tipoReceita: event.target.value as TipoReceita | '',
-                  }))
-                }
-              />
-            ) : (
-              <Input
-                label="Tipo"
-                name="tipoReceita"
-                value={form.tipoReceita ? labelTipoReceita(form.tipoReceita) : ''}
-                disabled
-                readOnly
-              />
-            )}
             <Select
               label="Pago"
               name="pago"

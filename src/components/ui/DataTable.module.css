@@ -19,23 +19,10 @@
 
 .table th,
 .table td {
-  padding: 12px var(--spacing-sm);
+  padding: 12px 10px;
   text-align: left;
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
-}
-
-/* Colunas com mesma largura — cabeçalhos e células com ritmo visual uniforme */
-.tableEqual th {
-  text-align: center;
-}
-
-.tableEqual td {
-  text-align: left;
-}
-
-.tableEqual td.alignRight {
-  text-align: right;
 }
 
 .table th {
@@ -45,9 +32,6 @@
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
   background: var(--color-table-header);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .table tbody tr:hover {
@@ -57,16 +41,6 @@
 .table th.alignRight,
 .table td.alignRight {
   text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.table th.alignCenter,
-.table td.alignCenter {
-  text-align: center;
-}
-
-.colMoney,
-.colDate {
   font-variant-numeric: tabular-nums;
 }
 

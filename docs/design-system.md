@@ -246,22 +246,6 @@ rolagem horizontal permanente. O que aparece no cartão é definido por coluna:
 Toda coluna nova deve declarar sua prioridade. `mobileMode="scroll"` mantém a tabela com
 rolagem horizontal quando o cartão não fizer sentido.
 
-#### Largura das colunas (desktop)
-
-Por padrão o `DataTable` usa **`columnLayout="equal"`**: cada coluna recebe a mesma
-fração da largura (`100% ÷ N`), com cabeçalhos centralizados e padding uniforme.
-A tabela ocupa `width: 100%` do card e ajusta-se ao viewport.
-
-Para larguras customizadas por coluna, passe `columnLayout="auto"` e declare `width`
-em cada coluna. Presets opcionais em `src/constants/tableColumnWidths.ts`.
-
-#### Formulários
-
-- **`.formGrid`** — grade de 3 colunas iguais (Despesas, Receitas). Campos condicionais
-  devem ser agrupados para preferir linhas completas de 3.
-- **`.formNarrow`** — exceção intencional para cadastros de campo único (Categorias,
-  Pagadores, Cartões, Convites): `max-width: 480px`, não segue a grade ampla.
-
 ### Badge / status
 
 - Pago → verde; Pendente → warning ou cinza; Conjunta/Individual → neutro/primary suave.
@@ -331,7 +315,6 @@ em cada coluna. Presets opcionais em `src/constants/tableColumnWidths.ts`.
 - [ ] Shell (header/sidebar/main) respeitado
 - [ ] Sem rolagem horizontal entre 320px e 1920px
 - [ ] Colunas novas de `DataTable` declaram `priority`
-- [ ] Colunas de tabela usam `columnLayout="equal"` (padrão) ou mapa documentado em `auto`
 - [ ] Alvos de toque ≥ 44px abaixo de 900px
 - [ ] Breakpoints restritos à escala da seção 6
 - [ ] Textos e empty states no tom do DS
