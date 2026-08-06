@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { categoriasApi } from '../api/categorias.api'
-import { despesasApi } from '../api/despesas.api'
-import { receitasApi } from '../api/receitas.api'
 import { Card } from '../components/ui/Card'
 import { useCompetencia } from '../context/CompetenciaContext'
-import { useApiFeedback } from '../hooks/useApiFeedback'
-import type { Categoria } from '../types/categoria.types'
-import type { Despesa } from '../types/despesa.types'
-import type { Receita } from '../types/receita.types'
+import {
+  useCategoriasQuery,
+  useDespesasCompetenciaQuery,
+  useReceitasCompetenciaQuery,
+} from '../hooks/queries/useFinanceQueries'
 import { calcularResumoDespesas } from '../utils/despesasResumo'
 import { formatCurrency } from '../utils/format'
 import { calcularBalancoMes } from '../utils/homeBalanco'
@@ -59,35 +57,18 @@ function HomeSkeleton() {
 
 export function HomePage() {
   const { ano, mes } = useCompetencia()
-  const { handleError } = useApiFeedback()
-  const [despesas, setDespesas] = useState<Despesa[]>([])
-  const [receitas, setReceitas] = useState<Receita[]>([])
-  const [categorias, setCategorias] = useState<Categoria[]>([])
-  const [loading, setLoading] = useState(true)
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const despesasQuery = useDespesasCompetenciaQuery(ano, mes)
+  const receitasQuery = useReceitasCompetenciaQuery(ano, mes)
+  const categoriasQuery = useCategoriasQuery()
 
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const [despesasResponse, receitasResponse, categoriasResponse] = await Promise.all([
-        despesasApi.listarPorCompetencia(ano, mes),
-        receitasApi.listarPorCompetencia(ano, mes),
-        categoriasApi.listar(),
-      ])
-      setDespesas(despesasResponse)
-      setReceitas(receitasResponse.receitas)
-      setCategorias(categoriasResponse)
-      setHasLoadedOnce(true)
-    } catch (error) {
-      handleError(error)
-    } finally {
-      setLoading(false)
-    }
-  }, [ano, mes, handleError])
+  const despesas = despesasQuery.data ?? []
+  const receitas = receitasQuery.data?.receitas ?? []
+  const categorias = categoriasQuery.data ?? []
 
-  useEffect(() => {
-    void loadData()
-  }, [loadData])
+  const isInitialLoading =
+    despesasQuery.isPending || receitasQuery.isPending || categoriasQuery.isPending
+  const isRefreshing =
+    (despesasQuery.isFetching || receitasQuery.isFetching) && !isInitialLoading
 
   const balanco = useMemo(() => calcularBalancoMes(receitas, despesas), [receitas, despesas])
   const porCategoria = useMemo(
@@ -97,21 +78,22 @@ export function HomePage() {
   const resumoDespesas = useMemo(() => calcularResumoDespesas(despesas), [despesas])
   const balancoMax = Math.max(balanco.totalEntradas, balanco.totalSaidas, 1)
 
-  const individuaisData = resumoDespesas.porResponsavel.map((item) => ({
-    nome: item.nome,
-    total: item.total,
-  }))
+  const individuaisData = useMemo(
+    () =>
+      resumoDespesas.porResponsavel.map((item) => ({
+        nome: item.nome,
+        total: item.total,
+      })),
+    [resumoDespesas.porResponsavel],
+  )
 
-  if (loading && !hasLoadedOnce) {
+  if (isInitialLoading) {
     return <HomeSkeleton />
   }
 
   return (
-    <div
-      className={`${styles.grid} ${styles.gridTwo}`}
-      aria-busy={loading || undefined}
-    >
-      {loading ? (
+    <div className={`${styles.grid} ${styles.gridTwo}`} aria-busy={isRefreshing || undefined}>
+      {isRefreshing ? (
         <p className={styles.refreshHint} role="status">
           Atualizando competência…
         </p>

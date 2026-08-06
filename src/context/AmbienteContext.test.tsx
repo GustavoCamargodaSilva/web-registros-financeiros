@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { ambientesApi } from '../api/ambientes.api'
 import { ToastProvider } from '../components/toast/ToastProvider'
+import { withQueryClient } from '../test/queryWrapper'
 import { AmbienteProvider, useAmbientePermissoes } from './AmbienteContext'
 
 vi.mock('../api/ambientes.api', () => ({
@@ -27,12 +28,14 @@ function Probe() {
 describe('AmbienteProvider', () => {
   it('compartilha um único carregamento de ambientes com os consumidores', async () => {
     render(
-      <ToastProvider>
-        <AmbienteProvider>
-          <Probe />
-          <Probe />
-        </AmbienteProvider>
-      </ToastProvider>,
+      withQueryClient(
+        <ToastProvider>
+          <AmbienteProvider>
+            <Probe />
+            <Probe />
+          </AmbienteProvider>
+        </ToastProvider>,
+      ),
     )
 
     expect(screen.getAllByText('carregando-permissoes')).toHaveLength(2)
