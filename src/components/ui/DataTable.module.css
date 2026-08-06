@@ -32,6 +32,9 @@
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
   background: var(--color-table-header);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .table tbody tr:hover {
@@ -41,6 +44,11 @@
 .table th.alignRight,
 .table td.alignRight {
   text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.colMoney,
+.colDate {
   font-variant-numeric: tabular-nums;
 }
 

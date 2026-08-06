@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { receitasApi } from '../api/receitas.api'
+import {
+  RECEITAS_READONLY_TABLE_WIDTHS,
+  RECEITAS_TABLE_WIDTHS,
+} from '../constants/tableColumnWidths'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
@@ -268,11 +272,14 @@ export function ReceitasPage() {
   )
 
   const columns = useMemo<DataTableColumn<Receita>[]>(
-    () => [
+    () => {
+      const widths = canWrite ? RECEITAS_TABLE_WIDTHS : RECEITAS_READONLY_TABLE_WIDTHS
+
+      return [
       {
         key: 'pagador',
         header: 'Pagador',
-        width: '18%',
+        width: widths.pagador,
         truncate: true,
         priority: 'primary',
         title: (row) => row.pagadorDescricao,
@@ -281,7 +288,7 @@ export function ReceitasPage() {
       {
         key: 'responsavel',
         header: 'Responsável',
-        width: '16%',
+        width: widths.responsavel,
         truncate: true,
         title: (row) => row.responsavelNome?.trim() || undefined,
         render: (row) => primeiroNome(row.responsavelNome),
@@ -289,7 +296,8 @@ export function ReceitasPage() {
       {
         key: 'valor',
         header: 'Valor',
-        width: '14%',
+        width: widths.valor,
+        align: 'right',
         priority: 'primary',
         render: (row) => (
           <span className={styles.moneyIncome}>{formatCurrency(row.valor)}</span>
@@ -298,13 +306,14 @@ export function ReceitasPage() {
       {
         key: 'dataPagamento',
         header: 'Pagamento',
-        width: '16%',
+        width: widths.dataPagamento,
+        align: 'right',
         render: (row) => formatDate(row.dataPagamento),
       },
       {
         key: 'pago',
         header: 'Status',
-        width: '16%',
+        width: widths.status,
         render: (row) => <Badge paid={row.pago} />,
       },
       ...(canWrite
@@ -312,7 +321,7 @@ export function ReceitasPage() {
             {
               key: 'actions',
               header: 'Ações',
-              width: '132px',
+              width: RECEITAS_TABLE_WIDTHS.actions,
               priority: 'actions' as const,
               render: (row: Receita) => (
                 <div className={styles.tableActions}>
@@ -354,7 +363,8 @@ export function ReceitasPage() {
             },
           ]
         : []),
-    ],
+    ]
+    },
     [canWrite, pagoLoadingId, alternarPago, abrirEdicao],
   )
 
@@ -412,33 +422,6 @@ export function ReceitasPage() {
             className={`${styles.form} ${styles.formGrid}`}
             onSubmit={editando ? handleSubmitEdicao : handleSubmitCadastro}
           >
-            {!editando ? (
-              <Select
-                label="Tipo"
-                name="tipoReceita"
-                value={form.tipoReceita}
-                error={errors.tipoReceita}
-                placeholder="Selecione"
-                options={[
-                  { value: 'FIXO', label: 'Fixo (repete 12 meses)' },
-                  { value: 'VARIAVEL', label: 'Variável (pontual)' },
-                ]}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    tipoReceita: event.target.value as TipoReceita | '',
-                  }))
-                }
-              />
-            ) : (
-              <Input
-                label="Tipo"
-                name="tipoReceita"
-                value={form.tipoReceita ? labelTipoReceita(form.tipoReceita) : ''}
-                disabled
-                readOnly
-              />
-            )}
             <Select
               label="Pagador"
               name="pagadorId"
@@ -477,6 +460,33 @@ export function ReceitasPage() {
               error={errors.valor}
               onChange={(event) => setForm((current) => ({ ...current, valor: event.target.value }))}
             />
+            {!editando ? (
+              <Select
+                label="Tipo"
+                name="tipoReceita"
+                value={form.tipoReceita}
+                error={errors.tipoReceita}
+                placeholder="Selecione"
+                options={[
+                  { value: 'FIXO', label: 'Fixo (repete 12 meses)' },
+                  { value: 'VARIAVEL', label: 'Variável (pontual)' },
+                ]}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    tipoReceita: event.target.value as TipoReceita | '',
+                  }))
+                }
+              />
+            ) : (
+              <Input
+                label="Tipo"
+                name="tipoReceita"
+                value={form.tipoReceita ? labelTipoReceita(form.tipoReceita) : ''}
+                disabled
+                readOnly
+              />
+            )}
             <Select
               label="Pago"
               name="pago"

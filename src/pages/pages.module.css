@@ -99,8 +99,12 @@
 
 .filtrosRow {
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 260px));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-md);
+}
+
+.filtrosRow > * {
+  min-width: 0;
 }
 
 @media (max-width: 640px) {

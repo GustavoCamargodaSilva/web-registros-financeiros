@@ -246,6 +246,33 @@ rolagem horizontal permanente. O que aparece no cartão é definido por coluna:
 Toda coluna nova deve declarar sua prioridade. `mobileMode="scroll"` mantém a tabela com
 rolagem horizontal quando o cartão não fizer sentido.
 
+#### Presets de largura (desktop)
+
+Larguras centralizadas em `src/constants/tableColumnWidths.ts` (espelhadas pelos tokens
+`--table-col-*` em `tokens.css`). **Dentro de uma mesma tabela, usar apenas percentuais**
+que somem 100% — evitar misturar `px` e `%` sem mapa documentado.
+
+| Preset | Uso | Largura |
+|--------|-----|---------|
+| `textPrimary` | Descrição, pagador, nome principal | `20%` |
+| `textSecondary` | Responsável | `15%` |
+| `textTertiary` | Cartão, categoria | `13%` |
+| `money` | Valor monetário (+ `align: 'right'`) | `10%` |
+| `date` | Vencimento, pagamento (+ `align: 'right'`) | `11%` |
+| `status` | Badge pago/pendente | `10%` |
+| `short` | Parcela, ID | `8%` / `10%` |
+| `actions` | Botões de ação | `13%`–`18%` |
+
+Mapas prontos por tela: `DESPESAS_TABLE_WIDTHS`, `RECEITAS_TABLE_WIDTHS`, etc.
+Helper: `columnWidth('textPrimary')`.
+
+#### Formulários
+
+- **`.formGrid`** — grade de 3 colunas iguais (Despesas, Receitas). Campos condicionais
+  devem ser agrupados para preferir linhas completas de 3.
+- **`.formNarrow`** — exceção intencional para cadastros de campo único (Categorias,
+  Pagadores, Cartões, Convites): `max-width: 480px`, não segue a grade ampla.
+
 ### Badge / status
 
 - Pago → verde; Pendente → warning ou cinza; Conjunta/Individual → neutro/primary suave.
@@ -315,6 +342,7 @@ rolagem horizontal quando o cartão não fizer sentido.
 - [ ] Shell (header/sidebar/main) respeitado
 - [ ] Sem rolagem horizontal entre 320px e 1920px
 - [ ] Colunas novas de `DataTable` declaram `priority`
+- [ ] Colunas de tabela usam preset de `tableColumnWidths.ts` (ou mapa documentado que soma 100%)
 - [ ] Alvos de toque ≥ 44px abaixo de 900px
 - [ ] Breakpoints restritos à escala da seção 6
 - [ ] Textos e empty states no tom do DS

@@ -34,6 +34,11 @@ interface DataTableProps<T> {
   emptyMessage?: string
   getRowKey?: (row: T, index: number) => string | number
   /**
+   * Reservado para layouts de coluna padronizados. Default `'auto'` preserva
+   * o comportamento atual (larguras vindas de cada coluna).
+   */
+  columnLayout?: 'auto' | 'presets'
+  /**
    * Comportamento abaixo de 900px. `cards` reorganiza cada linha num cartão;
    * `scroll` mantém a tabela com rolagem horizontal.
    */
@@ -130,6 +135,7 @@ function DataTableInner<T>({
   data,
   emptyMessage = 'Nenhum registro encontrado.',
   getRowKey,
+  columnLayout = 'auto',
   mobileMode = 'cards',
   loading = false,
 }: DataTableProps<T>) {
@@ -204,7 +210,7 @@ function DataTableInner<T>({
     .join(' ')
 
   return (
-    <div className={wrapperClass}>
+    <div className={wrapperClass} data-column-layout={columnLayout}>
       <table className={styles.table}>
         <colgroup>
           {columns.map((column) => (
