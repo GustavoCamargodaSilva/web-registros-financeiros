@@ -1,11 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router'
 import { ambientesApi } from '../api/ambientes.api'
 import { convitesApi } from '../api/convites.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { DataTable } from '../components/ui/DataTable'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
@@ -46,6 +46,53 @@ export function ConvitesPage() {
   const [removing, setRemoving] = useState(false)
 
   const isDono = canManageMembros
+
+  const columns = useMemo<DataTableColumn<MembroAmbiente>[]>(
+    () => [
+      {
+        key: 'nome',
+        header: 'Nome',
+        width: isDono ? '40%' : '50%',
+        truncate: true,
+        priority: 'primary',
+        title: (row) => row.nome,
+        render: (row) => primeiroNome(row.nome),
+      },
+      {
+        key: 'papel',
+        header: 'Papel',
+        width: isDono ? '35%' : '50%',
+        render: (row) => labelPapel(row.papel),
+      },
+      ...(isDono
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              width: '25%',
+              priority: 'actions' as const,
+              render: (row: MembroAmbiente) =>
+                row.papel === 'EDITOR' || row.papel === 'LEITOR' ? (
+                  <div className={styles.tableActions}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className={styles.actionDanger}
+                      title="Remover acesso"
+                      aria-label={`Remover acesso de ${primeiroNome(row.nome)}`}
+                      onClick={() => setRemoveTarget(row)}
+                    >
+                      <IconTrash />
+                    </Button>
+                  </div>
+                ) : null,
+            },
+          ]
+        : []),
+    ],
+    [isDono],
+  )
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -160,50 +207,9 @@ export function ConvitesPage() {
         <DataTable
           data={membros}
           loading={listLoading}
+          getRowKey={(row) => row.usuarioId}
           emptyMessage="Nenhum membro neste ambiente."
-          columns={[
-            {
-              key: 'nome',
-              header: 'Nome',
-              width: isDono ? '40%' : '50%',
-              truncate: true,
-              priority: 'primary',
-              title: (row) => row.nome,
-              render: (row) => primeiroNome(row.nome),
-            },
-            {
-              key: 'papel',
-              header: 'Papel',
-              width: isDono ? '35%' : '50%',
-              render: (row) => labelPapel(row.papel),
-            },
-            ...(isDono
-              ? [
-                  {
-                    key: 'actions',
-                    header: 'Ações',
-                    width: '25%',
-                    priority: 'actions' as const,
-                    render: (row: MembroAmbiente) =>
-                      row.papel === 'EDITOR' || row.papel === 'LEITOR' ? (
-                        <div className={styles.tableActions}>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className={styles.actionDanger}
-                            title="Remover acesso"
-                            aria-label={`Remover acesso de ${primeiroNome(row.nome)}`}
-                            onClick={() => setRemoveTarget(row)}
-                          >
-                            <IconTrash />
-                          </Button>
-                        </div>
-                      ) : null,
-                  },
-                ]
-              : []),
-          ]}
+          columns={columns}
         />
       </Card>
 

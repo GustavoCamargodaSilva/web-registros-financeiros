@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { cartoesApi } from '../api/cartoes.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
@@ -73,39 +73,42 @@ export function CartoesPage() {
     }
   }
 
-  const columns: DataTableColumn<Cartao>[] = [
-    { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Cartao) => row.id },
-    {
-      key: 'nome',
-      header: 'Nome',
-      priority: 'primary',
-      render: (row: Cartao) => row.nome,
-    },
-    ...(canWrite
-      ? [
-          {
-            key: 'actions',
-            header: 'Ações',
-            priority: 'actions' as const,
-            render: (row: Cartao) => (
-              <div className={styles.tableActions}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={styles.actionDanger}
-                  title="Excluir"
-                  aria-label="Excluir"
-                  onClick={() => setDeleteTarget(row)}
-                >
-                  <IconTrash />
-                </Button>
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ]
+  const columns = useMemo<DataTableColumn<Cartao>[]>(
+    () => [
+      { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Cartao) => row.id },
+      {
+        key: 'nome',
+        header: 'Nome',
+        priority: 'primary',
+        render: (row: Cartao) => row.nome,
+      },
+      ...(canWrite
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              priority: 'actions' as const,
+              render: (row: Cartao) => (
+                <div className={styles.tableActions}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={styles.actionDanger}
+                    title="Excluir"
+                    aria-label="Excluir"
+                    onClick={() => setDeleteTarget(row)}
+                  >
+                    <IconTrash />
+                  </Button>
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [canWrite],
+  )
 
   return (
     <div className={styles.stack}>
@@ -133,7 +136,12 @@ export function CartoesPage() {
       )}
 
       <Card title="Cartões cadastrados">
-        <DataTable data={cartoes} columns={columns} loading={listLoading} />
+        <DataTable
+          data={cartoes}
+          columns={columns}
+          loading={listLoading}
+          getRowKey={(row) => row.id}
+        />
       </Card>
 
       <Modal
