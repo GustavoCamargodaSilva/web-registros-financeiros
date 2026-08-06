@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router'
 import { ambientesApi } from '../api/ambientes.api'
 import { convitesApi } from '../api/convites.api'
+import { columnWidth } from '../constants/tableColumnWidths'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -52,7 +53,7 @@ export function ConvitesPage() {
       {
         key: 'nome',
         header: 'Nome',
-        width: isDono ? '40%' : '50%',
+        width: isDono ? columnWidth('memberName') : '50%',
         truncate: true,
         priority: 'primary',
         title: (row) => row.nome,
@@ -61,7 +62,7 @@ export function ConvitesPage() {
       {
         key: 'papel',
         header: 'Papel',
-        width: isDono ? '35%' : '50%',
+        width: isDono ? columnWidth('memberRole') : '50%',
         render: (row) => labelPapel(row.papel),
       },
       ...(isDono
@@ -69,7 +70,7 @@ export function ConvitesPage() {
             {
               key: 'actions',
               header: 'Ações',
-              width: '25%',
+              width: columnWidth('memberActions'),
               priority: 'actions' as const,
               render: (row: MembroAmbiente) =>
                 row.papel === 'EDITOR' || row.papel === 'LEITOR' ? (

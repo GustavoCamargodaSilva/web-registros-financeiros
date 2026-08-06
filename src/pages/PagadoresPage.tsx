@@ -1,5 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { pagadoresApi } from '../api/pagadores.api'
+import { columnWidth } from '../constants/tableColumnWidths'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -75,10 +76,11 @@ export function PagadoresPage() {
 
   const columns = useMemo<DataTableColumn<Pagador>[]>(
     () => [
-      { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Pagador) => row.id },
+      { key: 'id', header: 'ID', hideOnMobile: true, width: columnWidth('id'), render: (row: Pagador) => row.id },
       {
         key: 'descricao',
         header: 'Descrição',
+        width: columnWidth('textFill'),
         priority: 'primary',
         render: (row: Pagador) => row.descricao,
       },
@@ -87,6 +89,7 @@ export function PagadoresPage() {
             {
               key: 'actions',
               header: 'Ações',
+              width: columnWidth('actionsCompact'),
               priority: 'actions' as const,
               render: (row: Pagador) => (
                 <div className={styles.tableActions}>

@@ -67,6 +67,22 @@ describe('DataTable', () => {
     expect(screen.getByText('Nada aqui.')).toBeInTheDocument()
   })
 
+  it('renderiza colgroup com larguras declaradas nas colunas', () => {
+    setViewportWidth(1280)
+
+    const columnsWithWidth: DataTableColumn<Row>[] = [
+      { key: 'nome', header: 'Nome', width: '22%', render: (row) => row.nome },
+      { key: 'valor', header: 'Valor', width: '10%', align: 'right', render: (row) => row.valor },
+    ]
+
+    const { container } = render(<DataTable data={data} columns={columnsWithWidth} />)
+
+    const cols = container.querySelectorAll('colgroup col')
+    expect(cols).toHaveLength(2)
+    expect(cols[0]?.getAttribute('style')).toContain('width: 22%')
+    expect(cols[1]?.getAttribute('style')).toContain('width: 10%')
+  })
+
   it('com loading não mostra empty state nem dados', () => {
     setViewportWidth(1280)
 

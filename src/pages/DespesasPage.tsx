@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { despesasApi } from '../api/despesas.api'
+import {
+  DESPESAS_READONLY_TABLE_WIDTHS,
+  DESPESAS_TABLE_WIDTHS,
+} from '../constants/tableColumnWidths'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
@@ -339,11 +343,14 @@ export function DespesasPage() {
   )
 
   const columns = useMemo<DataTableColumn<Despesa>[]>(
-    () => [
+    () => {
+      const widths = canWrite ? DESPESAS_TABLE_WIDTHS : DESPESAS_READONLY_TABLE_WIDTHS
+
+      return [
       {
         key: 'descricao',
         header: 'Descrição',
-        width: '160px',
+        width: widths.descricao,
         truncate: true,
         priority: 'primary',
         title: (row) => row.descricao,
@@ -352,7 +359,8 @@ export function DespesasPage() {
       {
         key: 'valor',
         header: 'Valor',
-        width: '110px',
+        width: widths.valor,
+        align: 'right',
         priority: 'primary',
         render: (row) => (
           <span className={styles.moneyExpense}>{formatCurrency(row.valor)}</span>
@@ -361,13 +369,14 @@ export function DespesasPage() {
       {
         key: 'vencimento',
         header: 'Vencimento',
-        width: '110px',
+        width: widths.vencimento,
+        align: 'right',
         render: (row) => formatDate(row.vencimento),
       },
       {
         key: 'responsavel',
         header: 'Responsável',
-        width: '18%',
+        width: widths.responsavel,
         truncate: true,
         title: (row) =>
           row.escopo === 'CONJUNTA' ? 'Conjunta' : row.responsavelNome?.trim() || undefined,
@@ -376,7 +385,7 @@ export function DespesasPage() {
       {
         key: 'cartao',
         header: 'Cartão',
-        width: '110px',
+        width: widths.cartao,
         truncate: true,
         title: (row) => row.cartaoNome ?? undefined,
         render: (row) => row.cartaoNome ?? '-',
@@ -384,7 +393,8 @@ export function DespesasPage() {
       {
         key: 'parcela',
         header: 'Parcela',
-        width: '90px',
+        width: widths.parcela,
+        align: 'right',
         priority: 'low',
         render: (row) =>
           row.totalParcelas && row.totalParcelas > 1
@@ -394,7 +404,7 @@ export function DespesasPage() {
       {
         key: 'pago',
         header: 'Status',
-        width: '14%',
+        width: widths.status,
         render: (row) => <Badge paid={row.pago} />,
       },
       ...(canWrite
@@ -402,7 +412,7 @@ export function DespesasPage() {
             {
               key: 'actions',
               header: 'Ações',
-              width: '132px',
+              width: DESPESAS_TABLE_WIDTHS.actions,
               priority: 'actions' as const,
               render: (row: Despesa) => (
                 <div className={styles.tableActions}>
@@ -448,7 +458,8 @@ export function DespesasPage() {
             },
           ]
         : []),
-    ],
+    ]
+    },
     [canWrite, pagoLoadingId, alternarPago, abrirEdicao],
   )
 
@@ -580,6 +591,62 @@ export function DespesasPage() {
               error={errors.vencimento}
               onChange={(event) => setForm((current) => ({ ...current, vencimento: event.target.value }))}
             />
+            <Select
+              label="Escopo"
+              name="escopo"
+              value={form.escopo}
+              error={errors.escopo}
+              options={[
+                { value: 'INDIVIDUAL', label: 'Individual' },
+                { value: 'CONJUNTA', label: 'Conjunta' },
+              ]}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  escopo: event.target.value as EscopoDespesa,
+                  responsavelUsuarioId:
+                    event.target.value === 'CONJUNTA'
+                      ? ''
+                      : current.responsavelUsuarioId || String(usuario?.id ?? ''),
+                }))
+              }
+            />
+            <Select
+              label="Pago"
+              name="pago"
+              value={form.pago}
+              error={errors.pago}
+              placeholder="Selecione"
+              options={[
+                { value: 'true', label: 'Sim' },
+                { value: 'false', label: 'Não' },
+              ]}
+              onChange={(event) => setForm((current) => ({ ...current, pago: event.target.value }))}
+            />
+            <Select
+              label="Categoria"
+              name="categoriaId"
+              value={form.categoriaId}
+              error={errors.categoriaId}
+              placeholder="Selecione"
+              options={categorias.map((categoria) => ({
+                value: categoria.id,
+                label: categoria.descricao,
+              }))}
+              onChange={(event) => setForm((current) => ({ ...current, categoriaId: event.target.value }))}
+            />
+            <Select
+              label="Cartão (opcional)"
+              name="cartaoId"
+              value={form.cartaoId}
+              error={errors.cartaoId}
+              placeholder="Sem cartão"
+              options={cartoes.map((cartao) => ({
+                value: cartao.id,
+                label: cartao.nome,
+              }))}
+              onChange={(event) => setForm((current) => ({ ...current, cartaoId: event.target.value }))}
+            />
             {!editando ? (
               <Select
                 label="Tipo"
@@ -623,26 +690,6 @@ export function DespesasPage() {
                 }
               />
             ) : null}
-            <Select
-              label="Escopo"
-              name="escopo"
-              value={form.escopo}
-              error={errors.escopo}
-              options={[
-                { value: 'INDIVIDUAL', label: 'Individual' },
-                { value: 'CONJUNTA', label: 'Conjunta' },
-              ]}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  escopo: event.target.value as EscopoDespesa,
-                  responsavelUsuarioId:
-                    event.target.value === 'CONJUNTA'
-                      ? ''
-                      : current.responsavelUsuarioId || String(usuario?.id ?? ''),
-                }))
-              }
-            />
             {form.escopo === 'INDIVIDUAL' ? (
               <Select
                 label="Responsável"
@@ -659,42 +706,6 @@ export function DespesasPage() {
                 }
               />
             ) : null}
-            <Select
-              label="Pago"
-              name="pago"
-              value={form.pago}
-              error={errors.pago}
-              placeholder="Selecione"
-              options={[
-                { value: 'true', label: 'Sim' },
-                { value: 'false', label: 'Não' },
-              ]}
-              onChange={(event) => setForm((current) => ({ ...current, pago: event.target.value }))}
-            />
-            <Select
-              label="Categoria"
-              name="categoriaId"
-              value={form.categoriaId}
-              error={errors.categoriaId}
-              placeholder="Selecione"
-              options={categorias.map((categoria) => ({
-                value: categoria.id,
-                label: categoria.descricao,
-              }))}
-              onChange={(event) => setForm((current) => ({ ...current, categoriaId: event.target.value }))}
-            />
-            <Select
-              label="Cartão (opcional)"
-              name="cartaoId"
-              value={form.cartaoId}
-              error={errors.cartaoId}
-              placeholder="Sem cartão"
-              options={cartoes.map((cartao) => ({
-                value: cartao.id,
-                label: cartao.nome,
-              }))}
-              onChange={(event) => setForm((current) => ({ ...current, cartaoId: event.target.value }))}
-            />
             <div className={styles.formActions}>
               <Button type="button" variant="outline" onClick={fecharFormulario} disabled={loading}>
                 Cancelar
