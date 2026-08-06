@@ -5,6 +5,7 @@ import { AuthProvider } from '../../context/AuthContext'
 import { ThemeProvider } from '../../context/ThemeContext'
 import { setViewportWidth } from '../../test/viewport'
 import { ToastProvider } from '../toast/ToastProvider'
+import { withQueryClient } from '../../test/queryWrapper'
 import { AppShell } from './AppShell'
 
 vi.mock('../../api/ambientes.api', () => ({
@@ -25,20 +26,22 @@ vi.mock('../../api/auth.api', () => ({
 
 function renderShell() {
   return render(
-    <ThemeProvider>
-      <MemoryRouter initialEntries={['/categorias']}>
-        <ToastProvider>
-          <AuthProvider>
-            <Routes>
-              <Route element={<AppShell />}>
-                <Route path="/categorias" element={<div>Conteúdo da página</div>} />
-                <Route path="/despesas" element={<div>Despesas</div>} />
-              </Route>
-            </Routes>
-          </AuthProvider>
-        </ToastProvider>
-      </MemoryRouter>
-    </ThemeProvider>,
+    withQueryClient(
+      <ThemeProvider>
+        <MemoryRouter initialEntries={['/categorias']}>
+          <ToastProvider>
+            <AuthProvider>
+              <Routes>
+                <Route element={<AppShell />}>
+                  <Route path="/categorias" element={<div>Conteúdo da página</div>} />
+                  <Route path="/despesas" element={<div>Despesas</div>} />
+                </Route>
+              </Routes>
+            </AuthProvider>
+          </ToastProvider>
+        </MemoryRouter>
+      </ThemeProvider>,
+    ),
   )
 }
 

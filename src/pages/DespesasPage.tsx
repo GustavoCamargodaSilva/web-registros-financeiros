@@ -1,7 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ambientesApi } from '../api/ambientes.api'
-import { cartoesApi } from '../api/cartoes.api'
-import { categoriasApi } from '../api/categorias.api'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { despesasApi } from '../api/despesas.api'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
@@ -15,10 +12,14 @@ import { useAuth } from '../context/AuthContext'
 import { useCompetencia } from '../context/CompetenciaContext'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
-import type { Cartao } from '../types/cartao.types'
-import type { Categoria } from '../types/categoria.types'
+import {
+  useCartoesQuery,
+  useCategoriasQuery,
+  useDespesasCompetenciaQuery,
+  useMembrosAtivoQuery,
+} from '../hooks/queries/useFinanceQueries'
+import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
 import type { Despesa, EscopoDespesa, TipoDespesa } from '../types/despesa.types'
-import type { MembroAmbiente } from '../types/membro.types'
 import { filtrarDespesas, type FiltroEscopoDespesa } from '../utils/despesasFiltro'
 import { calcularResumoDespesas } from '../utils/despesasResumo'
 import { formatCompetencia, formatCurrency, formatDate } from '../utils/format'
@@ -95,49 +96,27 @@ export function DespesasPage() {
   const { usuario } = useAuth()
   const { canWrite } = useAmbientePermissoes()
   const { showSuccess, handleError } = useApiFeedback()
-  const [despesas, setDespesas] = useState<Despesa[]>([])
-  const [categorias, setCategorias] = useState<Categoria[]>([])
-  const [cartoes, setCartoes] = useState<Cartao[]>([])
-  const [membros, setMembros] = useState<MembroAmbiente[]>([])
+  const invalidate = useInvalidateFinanceQueries()
+  const despesasQuery = useDespesasCompetenciaQuery(ano, mes)
+  const categoriasQuery = useCategoriasQuery()
+  const cartoesQuery = useCartoesQuery()
+  const membrosQuery = useMembrosAtivoQuery()
+
+  const despesas = despesasQuery.data ?? []
+  const categorias = categoriasQuery.data ?? []
+  const cartoes = cartoesQuery.data ?? []
+  const membros = membrosQuery.data ?? []
+  const listLoading = despesasQuery.isPending
+
   const [form, setForm] = useState<FormState>(() => buildInitialForm(usuario?.id))
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [loading, setLoading] = useState(false)
-  const [listLoading, setListLoading] = useState(true)
   const [formAberto, setFormAberto] = useState(false)
   const [despesaEmEdicao, setDespesaEmEdicao] = useState<Despesa | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Despesa | null>(null)
   const [pagoLoadingId, setPagoLoadingId] = useState<number | null>(null)
   const [filtroEscopo, setFiltroEscopo] = useState<FiltroEscopoDespesa>('TODOS')
   const [filtroResponsavelId, setFiltroResponsavelId] = useState('')
-
-  const loadData = useCallback(async (mode: 'full' | 'background' = 'full') => {
-    if (mode === 'full') {
-      setListLoading(true)
-    }
-    try {
-      const [despesasResponse, categoriasResponse, cartoesResponse, membrosResponse] =
-        await Promise.all([
-          despesasApi.listarPorCompetencia(ano, mes),
-          categoriasApi.listar(),
-          cartoesApi.listar(),
-          ambientesApi.listarMembrosAtivo(),
-        ])
-      setDespesas(despesasResponse)
-      setCategorias(categoriasResponse)
-      setCartoes(cartoesResponse)
-      setMembros(membrosResponse)
-    } catch (error) {
-      handleError(error)
-    } finally {
-      if (mode === 'full') {
-        setListLoading(false)
-      }
-    }
-  }, [ano, mes, handleError])
-
-  useEffect(() => {
-    void loadData()
-  }, [loadData])
 
   useEffect(() => {
     setFormAberto(false)
@@ -244,7 +223,7 @@ export function DespesasPage() {
       })
       fecharFormulario()
       showSuccess('Despesa cadastrada com sucesso')
-      void loadData('background')
+      await invalidate.despesas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {
@@ -275,7 +254,7 @@ export function DespesasPage() {
       })
       fecharFormulario()
       showSuccess('Despesa atualizada com sucesso')
-      void loadData('background')
+      await invalidate.despesas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {
@@ -326,7 +305,7 @@ export function DespesasPage() {
       if (excluindoSerieEditada) {
         fecharFormulario()
       }
-      void loadData('background')
+      await invalidate.despesas(ano, mes)
     } catch (error) {
       handleError(error)
     }
@@ -338,7 +317,7 @@ export function DespesasPage() {
     try {
       await despesasApi.atualizarPago(despesa.id, novoPago)
       showSuccess(novoPago ? 'Despesa marcada como paga' : 'Despesa marcada como pendente')
-      void loadData('background')
+      await invalidate.despesas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {

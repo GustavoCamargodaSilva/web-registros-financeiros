@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { categoriasApi } from '../api/categorias.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
@@ -8,37 +8,23 @@ import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
+import { useCategoriasQuery } from '../hooks/queries/useFinanceQueries'
+import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
 import type { Categoria } from '../types/categoria.types'
 import styles from './pages.module.css'
 
 export function CategoriasPage() {
   const { showSuccess, handleError } = useApiFeedback()
   const { canWrite } = useAmbientePermissoes()
-  const [categorias, setCategorias] = useState<Categoria[]>([])
+  const invalidate = useInvalidateFinanceQueries()
+  const categoriasQuery = useCategoriasQuery()
+  const categorias = categoriasQuery.data ?? []
+  const listLoading = categoriasQuery.isPending
+
   const [descricao, setDescricao] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [listLoading, setListLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Categoria | null>(null)
-
-  const loadCategorias = useCallback(async (mode: 'full' | 'background' = 'full') => {
-    if (mode === 'full') {
-      setListLoading(true)
-    }
-    try {
-      setCategorias(await categoriasApi.listar())
-    } catch (loadError) {
-      handleError(loadError)
-    } finally {
-      if (mode === 'full') {
-        setListLoading(false)
-      }
-    }
-  }, [handleError])
-
-  useEffect(() => {
-    void loadCategorias()
-  }, [loadCategorias])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -64,7 +50,7 @@ export function CategoriasPage() {
       await categoriasApi.cadastrar({ descricao: trimmed })
       setDescricao('')
       showSuccess('Categoria cadastrada com sucesso')
-      void loadCategorias('background')
+      await invalidate.categorias()
     } catch (submitError) {
       handleError(submitError)
     } finally {
@@ -81,7 +67,7 @@ export function CategoriasPage() {
       await categoriasApi.excluir(deleteTarget.id)
       showSuccess('Categoria excluída com sucesso')
       setDeleteTarget(null)
-      void loadCategorias('background')
+      await invalidate.categorias()
     } catch (deleteError) {
       handleError(deleteError)
     }

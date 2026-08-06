@@ -4,12 +4,12 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { ambienteStorage } from '../api/ambienteStorage'
-import { ambientesApi } from '../api/ambientes.api'
-import { useApiFeedback } from '../hooks/useApiFeedback'
+import { useAmbientesQuery } from '../hooks/queries/useFinanceQueries'
+import { queryKeys } from '../hooks/queries/queryKeys'
 import type { Ambiente } from '../types/ambiente.types'
 import type { PapelMembro } from '../types/membro.types'
 
@@ -41,29 +41,23 @@ export interface AmbientePermissoes {
 const AmbienteContext = createContext<AmbientePermissoes | null>(null)
 
 export function AmbienteProvider({ children }: { children: ReactNode }) {
-  const { handleError } = useApiFeedback()
-  const [ambiente, setAmbiente] = useState<Ambiente | null>(null)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
+  const ambientesQuery = useAmbientesQuery()
 
-  const reload = useCallback(async () => {
-    try {
-      const ambientes = await ambientesApi.listar()
-      const ativo = resolverAmbienteAtivo(ambientes)
-      setAmbiente(ativo)
-      if (ativo && ambienteStorage.get() == null) {
-        ambienteStorage.set(ativo.id)
-      }
-    } catch (error) {
-      handleError(error)
-      setAmbiente(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [handleError])
+  const ambiente = useMemo(
+    () => (ambientesQuery.data ? resolverAmbienteAtivo(ambientesQuery.data) : null),
+    [ambientesQuery.data],
+  )
 
   useEffect(() => {
-    void reload()
-  }, [reload])
+    if (ambiente && ambienteStorage.get() == null) {
+      ambienteStorage.set(ambiente.id)
+    }
+  }, [ambiente])
+
+  const reload = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.ambientes.all })
+  }, [queryClient])
 
   const papel = ambiente?.papel ?? null
   const canWrite = papel === 'DONO' || papel === 'EDITOR'
@@ -75,10 +69,10 @@ export function AmbienteProvider({ children }: { children: ReactNode }) {
       papel,
       canWrite,
       canManageMembros,
-      loading,
+      loading: ambientesQuery.isPending,
       reload,
     }),
-    [ambiente, papel, canWrite, canManageMembros, loading, reload],
+    [ambiente, papel, canWrite, canManageMembros, ambientesQuery.isPending, reload],
   )
 
   return <AmbienteContext.Provider value={value}>{children}</AmbienteContext.Provider>

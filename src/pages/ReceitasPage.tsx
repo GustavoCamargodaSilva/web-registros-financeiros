@@ -1,6 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ambientesApi } from '../api/ambientes.api'
-import { pagadoresApi } from '../api/pagadores.api'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { receitasApi } from '../api/receitas.api'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
@@ -14,8 +12,12 @@ import { useAuth } from '../context/AuthContext'
 import { useCompetencia } from '../context/CompetenciaContext'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
-import type { MembroAmbiente } from '../types/membro.types'
-import type { Pagador } from '../types/pagador.types'
+import {
+  useMembrosAtivoQuery,
+  usePagadoresQuery,
+  useReceitasCompetenciaQuery,
+} from '../hooks/queries/useFinanceQueries'
+import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
 import type { Receita, TipoReceita } from '../types/receita.types'
 import { formatCompetencia, formatCurrency, formatDate, formatPercent } from '../utils/format'
 import { primeiroNome } from '../utils/nome'
@@ -63,43 +65,23 @@ export function ReceitasPage() {
   const { usuario } = useAuth()
   const { canWrite } = useAmbientePermissoes()
   const { showSuccess, handleError } = useApiFeedback()
-  const [receitas, setReceitas] = useState<Receita[]>([])
-  const [pagadores, setPagadores] = useState<Pagador[]>([])
-  const [membros, setMembros] = useState<MembroAmbiente[]>([])
+  const invalidate = useInvalidateFinanceQueries()
+  const receitasQuery = useReceitasCompetenciaQuery(ano, mes)
+  const pagadoresQuery = usePagadoresQuery()
+  const membrosQuery = useMembrosAtivoQuery()
+
+  const receitas = receitasQuery.data?.receitas ?? []
+  const pagadores = pagadoresQuery.data ?? []
+  const membros = membrosQuery.data ?? []
+  const listLoading = receitasQuery.isPending
+
   const [form, setForm] = useState<FormState>(() => buildInitialForm(usuario?.id))
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [loading, setLoading] = useState(false)
-  const [listLoading, setListLoading] = useState(true)
   const [formAberto, setFormAberto] = useState(false)
   const [receitaEmEdicao, setReceitaEmEdicao] = useState<Receita | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Receita | null>(null)
   const [pagoLoadingId, setPagoLoadingId] = useState<number | null>(null)
-
-  const loadData = useCallback(async (mode: 'full' | 'background' = 'full') => {
-    if (mode === 'full') {
-      setListLoading(true)
-    }
-    try {
-      const [receitasResponse, pagadoresResponse, membrosResponse] = await Promise.all([
-        receitasApi.listarPorCompetencia(ano, mes),
-        pagadoresApi.listar(),
-        ambientesApi.listarMembrosAtivo(),
-      ])
-      setReceitas(receitasResponse.receitas)
-      setPagadores(pagadoresResponse)
-      setMembros(membrosResponse)
-    } catch (error) {
-      handleError(error)
-    } finally {
-      if (mode === 'full') {
-        setListLoading(false)
-      }
-    }
-  }, [ano, mes, handleError])
-
-  useEffect(() => {
-    void loadData()
-  }, [loadData])
 
   useEffect(() => {
     setFormAberto(false)
@@ -185,7 +167,7 @@ export function ReceitasPage() {
           ? 'Receita fixa cadastrada para 12 meses'
           : 'Receita cadastrada com sucesso',
       )
-      void loadData('background')
+      await invalidate.receitas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {
@@ -211,7 +193,7 @@ export function ReceitasPage() {
       })
       fecharFormulario()
       showSuccess('Receita atualizada com sucesso')
-      void loadData('background')
+      await invalidate.receitas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {
@@ -245,7 +227,7 @@ export function ReceitasPage() {
         fecharFormulario()
       }
       setDeleteTarget(null)
-      void loadData('background')
+      await invalidate.receitas(ano, mes)
     } catch (error) {
       handleError(error)
     }
@@ -257,7 +239,7 @@ export function ReceitasPage() {
     try {
       await receitasApi.atualizarPago(receita.id, novoPago)
       showSuccess(novoPago ? 'Receita marcada como paga' : 'Receita marcada como pendente')
-      void loadData('background')
+      await invalidate.receitas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {
