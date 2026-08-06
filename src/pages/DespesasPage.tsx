@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { despesasApi } from '../api/despesas.api'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { DataTable } from '../components/ui/DataTable'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { Select } from '../components/ui/Select'
@@ -19,6 +20,7 @@ import {
   useMembrosAtivoQuery,
 } from '../hooks/queries/useFinanceQueries'
 import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
+import { queryKeys } from '../hooks/queries/queryKeys'
 import type { Despesa, EscopoDespesa, TipoDespesa } from '../types/despesa.types'
 import { filtrarDespesas, type FiltroEscopoDespesa } from '../utils/despesasFiltro'
 import { calcularResumoDespesas } from '../utils/despesasResumo'
@@ -97,6 +99,7 @@ export function DespesasPage() {
   const { canWrite } = useAmbientePermissoes()
   const { showSuccess, handleError } = useApiFeedback()
   const invalidate = useInvalidateFinanceQueries()
+  const queryClient = useQueryClient()
   const despesasQuery = useDespesasCompetenciaQuery(ano, mes)
   const categoriasQuery = useCategoriasQuery()
   const cartoesQuery = useCartoesQuery()
@@ -166,12 +169,12 @@ export function DespesasPage() {
     setFormAberto(true)
   }
 
-  const abrirEdicao = (despesa: Despesa) => {
+  const abrirEdicao = useCallback((despesa: Despesa) => {
     setFormAberto(false)
     setErrors({})
     setDespesaEmEdicao(despesa)
     setForm(buildEditForm(despesa))
-  }
+  }, [])
 
   const validate = (isEdit: boolean) => {
     const nextErrors: Partial<Record<keyof FormState, string>> = {}
@@ -311,19 +314,143 @@ export function DespesasPage() {
     }
   }
 
-  const alternarPago = async (despesa: Despesa) => {
-    const novoPago = !despesa.pago
-    setPagoLoadingId(despesa.id)
-    try {
-      await despesasApi.atualizarPago(despesa.id, novoPago)
-      showSuccess(novoPago ? 'Despesa marcada como paga' : 'Despesa marcada como pendente')
-      await invalidate.despesas(ano, mes)
-    } catch (error) {
-      handleError(error)
-    } finally {
-      setPagoLoadingId(null)
-    }
-  }
+  const alternarPago = useCallback(
+    async (despesa: Despesa) => {
+      const novoPago = !despesa.pago
+      const queryKey = queryKeys.despesas.competencia(ano, mes)
+      setPagoLoadingId(despesa.id)
+
+      const previous = queryClient.getQueryData<Despesa[]>(queryKey)
+      queryClient.setQueryData<Despesa[]>(queryKey, (old) =>
+        old?.map((item) => (item.id === despesa.id ? { ...item, pago: novoPago } : item)) ?? old,
+      )
+
+      try {
+        await despesasApi.atualizarPago(despesa.id, novoPago)
+        showSuccess(novoPago ? 'Despesa marcada como paga' : 'Despesa marcada como pendente')
+      } catch (error) {
+        queryClient.setQueryData(queryKey, previous)
+        handleError(error)
+      } finally {
+        setPagoLoadingId(null)
+      }
+    },
+    [ano, mes, queryClient, showSuccess, handleError],
+  )
+
+  const columns = useMemo<DataTableColumn<Despesa>[]>(
+    () => [
+      {
+        key: 'descricao',
+        header: 'Descrição',
+        width: '160px',
+        truncate: true,
+        priority: 'primary',
+        title: (row) => row.descricao,
+        render: (row) => row.descricao,
+      },
+      {
+        key: 'valor',
+        header: 'Valor',
+        width: '110px',
+        priority: 'primary',
+        render: (row) => (
+          <span className={styles.moneyExpense}>{formatCurrency(row.valor)}</span>
+        ),
+      },
+      {
+        key: 'vencimento',
+        header: 'Vencimento',
+        width: '110px',
+        render: (row) => formatDate(row.vencimento),
+      },
+      {
+        key: 'responsavel',
+        header: 'Responsável',
+        width: '18%',
+        truncate: true,
+        title: (row) =>
+          row.escopo === 'CONJUNTA' ? 'Conjunta' : row.responsavelNome?.trim() || undefined,
+        render: (row) => labelResponsavel(row),
+      },
+      {
+        key: 'cartao',
+        header: 'Cartão',
+        width: '110px',
+        truncate: true,
+        title: (row) => row.cartaoNome ?? undefined,
+        render: (row) => row.cartaoNome ?? '-',
+      },
+      {
+        key: 'parcela',
+        header: 'Parcela',
+        width: '90px',
+        priority: 'low',
+        render: (row) =>
+          row.totalParcelas && row.totalParcelas > 1
+            ? `${row.numeroParcela}/${row.totalParcelas}`
+            : '-',
+      },
+      {
+        key: 'pago',
+        header: 'Status',
+        width: '14%',
+        render: (row) => <Badge paid={row.pago} />,
+      },
+      ...(canWrite
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              width: '132px',
+              priority: 'actions' as const,
+              render: (row: Despesa) => (
+                <div className={styles.tableActions}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={row.pago ? styles.actionPaid : undefined}
+                    title={
+                      row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
+                    }
+                    aria-label={
+                      row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
+                    }
+                    disabled={pagoLoadingId === row.id}
+                    onClick={() => void alternarPago(row)}
+                  >
+                    <IconCheck />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    title="Editar"
+                    aria-label="Editar"
+                    onClick={() => abrirEdicao(row)}
+                  >
+                    <IconEdit />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={styles.actionDanger}
+                    title="Excluir"
+                    aria-label="Excluir"
+                    onClick={() => setDeleteTarget(row)}
+                  >
+                    <IconTrash />
+                  </Button>
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [canWrite, pagoLoadingId, alternarPago, abrirEdicao],
+  )
 
   return (
     <div className={styles.stack}>
@@ -584,119 +711,9 @@ export function DespesasPage() {
         <DataTable
           data={despesasFiltradas}
           loading={listLoading}
+          getRowKey={(row) => row.id}
           emptyMessage="Nenhuma despesa neste mês. Cadastre a primeira."
-          columns={[
-            {
-              key: 'descricao',
-              header: 'Descrição',
-              width: '160px',
-              truncate: true,
-              priority: 'primary',
-              title: (row) => row.descricao,
-              render: (row) => row.descricao,
-            },
-            {
-              key: 'valor',
-              header: 'Valor',
-              width: '110px',
-              priority: 'primary',
-              render: (row) => (
-                <span className={styles.moneyExpense}>{formatCurrency(row.valor)}</span>
-              ),
-            },
-            {
-              key: 'vencimento',
-              header: 'Vencimento',
-              width: '110px',
-              render: (row) => formatDate(row.vencimento),
-            },
-            {
-              key: 'responsavel',
-              header: 'Responsável',
-              width: '18%',
-              truncate: true,
-              title: (row) =>
-                row.escopo === 'CONJUNTA'
-                  ? 'Conjunta'
-                  : row.responsavelNome?.trim() || undefined,
-              render: (row) => labelResponsavel(row),
-            },
-            {
-              key: 'cartao',
-              header: 'Cartão',
-              width: '110px',
-              truncate: true,
-              title: (row) => row.cartaoNome ?? undefined,
-              render: (row) => row.cartaoNome ?? '-',
-            },
-            {
-              key: 'parcela',
-              header: 'Parcela',
-              width: '90px',
-              priority: 'low',
-              render: (row) =>
-                row.totalParcelas && row.totalParcelas > 1
-                  ? `${row.numeroParcela}/${row.totalParcelas}`
-                  : '-',
-            },
-            {
-              key: 'pago',
-              header: 'Status',
-              width: '14%',
-              render: (row) => <Badge paid={row.pago} />,
-            },
-            ...(canWrite
-              ? [
-                  {
-                    key: 'actions',
-                    header: 'Ações',
-                    width: '132px',
-                    priority: 'actions' as const,
-                    render: (row: Despesa) => (
-                      <div className={styles.tableActions}>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className={row.pago ? styles.actionPaid : undefined}
-                          title={
-                            row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
-                          }
-                          aria-label={
-                            row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
-                          }
-                          disabled={pagoLoadingId === row.id}
-                          onClick={() => void alternarPago(row)}
-                        >
-                          <IconCheck />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          title="Editar"
-                          aria-label="Editar"
-                          onClick={() => abrirEdicao(row)}
-                        >
-                          <IconEdit />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className={styles.actionDanger}
-                          title="Excluir"
-                          aria-label="Excluir"
-                          onClick={() => setDeleteTarget(row)}
-                        >
-                          <IconTrash />
-                        </Button>
-                      </div>
-                    ),
-                  },
-                ]
-              : []),
-          ]}
+          columns={columns}
         />
       </Card>
 

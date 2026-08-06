@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { pagadoresApi } from '../api/pagadores.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
@@ -73,39 +73,42 @@ export function PagadoresPage() {
     }
   }
 
-  const columns: DataTableColumn<Pagador>[] = [
-    { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Pagador) => row.id },
-    {
-      key: 'descricao',
-      header: 'Descrição',
-      priority: 'primary',
-      render: (row: Pagador) => row.descricao,
-    },
-    ...(canWrite
-      ? [
-          {
-            key: 'actions',
-            header: 'Ações',
-            priority: 'actions' as const,
-            render: (row: Pagador) => (
-              <div className={styles.tableActions}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={styles.actionDanger}
-                  title="Excluir"
-                  aria-label="Excluir"
-                  onClick={() => setDeleteTarget(row)}
-                >
-                  <IconTrash />
-                </Button>
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ]
+  const columns = useMemo<DataTableColumn<Pagador>[]>(
+    () => [
+      { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Pagador) => row.id },
+      {
+        key: 'descricao',
+        header: 'Descrição',
+        priority: 'primary',
+        render: (row: Pagador) => row.descricao,
+      },
+      ...(canWrite
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              priority: 'actions' as const,
+              render: (row: Pagador) => (
+                <div className={styles.tableActions}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={styles.actionDanger}
+                    title="Excluir"
+                    aria-label="Excluir"
+                    onClick={() => setDeleteTarget(row)}
+                  >
+                    <IconTrash />
+                  </Button>
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [canWrite],
+  )
 
   return (
     <div className={styles.stack}>
@@ -132,7 +135,12 @@ export function PagadoresPage() {
       )}
 
       <Card title="Pagadores cadastrados">
-        <DataTable data={pagadores} columns={columns} loading={listLoading} />
+        <DataTable
+          data={pagadores}
+          columns={columns}
+          loading={listLoading}
+          getRowKey={(row) => row.id}
+        />
       </Card>
 
       <Modal

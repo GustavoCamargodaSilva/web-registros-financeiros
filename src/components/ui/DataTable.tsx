@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import styles from './DataTable.module.css'
 
@@ -32,6 +32,7 @@ interface DataTableProps<T> {
   columns: DataTableColumn<T>[]
   data: T[]
   emptyMessage?: string
+  getRowKey?: (row: T, index: number) => string | number
   /**
    * Comportamento abaixo de 900px. `cards` reorganiza cada linha num cartão;
    * `scroll` mantém a tabela com rolagem horizontal.
@@ -124,10 +125,11 @@ function DataTableSkeleton<T>({
   )
 }
 
-export function DataTable<T>({
+function DataTableInner<T>({
   columns,
   data,
   emptyMessage = 'Nenhum registro encontrado.',
+  getRowKey,
   mobileMode = 'cards',
   loading = false,
 }: DataTableProps<T>) {
@@ -140,6 +142,8 @@ export function DataTable<T>({
   if (data.length === 0) {
     return <div className={styles.empty}>{emptyMessage}</div>
   }
+
+  const rowKey = getRowKey ?? ((_row: T, index: number) => index)
 
   if (isMobile && mobileMode === 'cards') {
     const visible = columns.filter((column) => !column.hideOnMobile)
@@ -154,7 +158,7 @@ export function DataTable<T>({
     return (
       <ul className={styles.cards}>
         {data.map((row, index) => (
-          <li key={index} className={styles.card}>
+          <li key={rowKey(row, index)} className={styles.card}>
             {primary.length > 0 ? (
               <div className={styles.cardHeader}>
                 {primary.map((column) => (
@@ -218,7 +222,7 @@ export function DataTable<T>({
         </thead>
         <tbody>
           {data.map((row, index) => (
-            <tr key={index}>
+            <tr key={rowKey(row, index)}>
               {columns.map((column) => (
                 <td
                   key={column.key}
@@ -235,3 +239,5 @@ export function DataTable<T>({
     </div>
   )
 }
+
+export const DataTable = memo(DataTableInner) as typeof DataTableInner
