@@ -19,10 +19,23 @@
 
 .table th,
 .table td {
-  padding: 12px 10px;
+  padding: 12px var(--spacing-sm);
   text-align: left;
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
+}
+
+/* Colunas com mesma largura — cabeçalhos e células com ritmo visual uniforme */
+.tableEqual th {
+  text-align: center;
+}
+
+.tableEqual td {
+  text-align: left;
+}
+
+.tableEqual td.alignRight {
+  text-align: right;
 }
 
 .table th {
@@ -45,6 +58,11 @@
 .table td.alignRight {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+.table th.alignCenter,
+.table td.alignCenter {
+  text-align: center;
 }
 
 .colMoney,

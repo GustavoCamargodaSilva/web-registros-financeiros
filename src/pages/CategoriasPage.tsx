@@ -1,6 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { categoriasApi } from '../api/categorias.api'
-import { columnWidth } from '../constants/tableColumnWidths'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -76,11 +75,10 @@ export function CategoriasPage() {
 
   const columns = useMemo<DataTableColumn<Categoria>[]>(
     () => [
-      { key: 'id', header: 'ID', hideOnMobile: true, width: columnWidth('id'), render: (row: Categoria) => row.id },
+      { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Categoria) => row.id },
       {
         key: 'descricao',
         header: 'Descrição',
-        width: columnWidth('textFill'),
         priority: 'primary',
         render: (row: Categoria) => row.descricao,
       },
@@ -89,7 +87,6 @@ export function CategoriasPage() {
             {
               key: 'actions',
               header: 'Ações',
-              width: columnWidth('actionsCompact'),
               priority: 'actions' as const,
               render: (row: Categoria) => (
                 <div className={styles.tableActions}>

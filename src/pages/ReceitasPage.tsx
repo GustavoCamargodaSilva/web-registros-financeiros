@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { receitasApi } from '../api/receitas.api'
-import {
-  RECEITAS_READONLY_TABLE_WIDTHS,
-  RECEITAS_TABLE_WIDTHS,
-} from '../constants/tableColumnWidths'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
@@ -272,14 +268,10 @@ export function ReceitasPage() {
   )
 
   const columns = useMemo<DataTableColumn<Receita>[]>(
-    () => {
-      const widths = canWrite ? RECEITAS_TABLE_WIDTHS : RECEITAS_READONLY_TABLE_WIDTHS
-
-      return [
+    () => [
       {
         key: 'pagador',
         header: 'Pagador',
-        width: widths.pagador,
         truncate: true,
         priority: 'primary',
         title: (row) => row.pagadorDescricao,
@@ -288,7 +280,6 @@ export function ReceitasPage() {
       {
         key: 'responsavel',
         header: 'Responsável',
-        width: widths.responsavel,
         truncate: true,
         title: (row) => row.responsavelNome?.trim() || undefined,
         render: (row) => primeiroNome(row.responsavelNome),
@@ -296,7 +287,6 @@ export function ReceitasPage() {
       {
         key: 'valor',
         header: 'Valor',
-        width: widths.valor,
         align: 'right',
         priority: 'primary',
         render: (row) => (
@@ -306,14 +296,12 @@ export function ReceitasPage() {
       {
         key: 'dataPagamento',
         header: 'Pagamento',
-        width: widths.dataPagamento,
         align: 'right',
         render: (row) => formatDate(row.dataPagamento),
       },
       {
         key: 'pago',
         header: 'Status',
-        width: widths.status,
         render: (row) => <Badge paid={row.pago} />,
       },
       ...(canWrite
@@ -321,7 +309,6 @@ export function ReceitasPage() {
             {
               key: 'actions',
               header: 'Ações',
-              width: RECEITAS_TABLE_WIDTHS.actions,
               priority: 'actions' as const,
               render: (row: Receita) => (
                 <div className={styles.tableActions}>
@@ -363,8 +350,7 @@ export function ReceitasPage() {
             },
           ]
         : []),
-    ]
-    },
+    ],
     [canWrite, pagoLoadingId, alternarPago, abrirEdicao],
   )
 

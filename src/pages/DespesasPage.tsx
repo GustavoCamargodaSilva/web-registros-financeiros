@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { despesasApi } from '../api/despesas.api'
-import {
-  DESPESAS_READONLY_TABLE_WIDTHS,
-  DESPESAS_TABLE_WIDTHS,
-} from '../constants/tableColumnWidths'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
@@ -343,14 +339,10 @@ export function DespesasPage() {
   )
 
   const columns = useMemo<DataTableColumn<Despesa>[]>(
-    () => {
-      const widths = canWrite ? DESPESAS_TABLE_WIDTHS : DESPESAS_READONLY_TABLE_WIDTHS
-
-      return [
+    () => [
       {
         key: 'descricao',
         header: 'Descrição',
-        width: widths.descricao,
         truncate: true,
         priority: 'primary',
         title: (row) => row.descricao,
@@ -359,7 +351,6 @@ export function DespesasPage() {
       {
         key: 'valor',
         header: 'Valor',
-        width: widths.valor,
         align: 'right',
         priority: 'primary',
         render: (row) => (
@@ -369,14 +360,12 @@ export function DespesasPage() {
       {
         key: 'vencimento',
         header: 'Vencimento',
-        width: widths.vencimento,
         align: 'right',
         render: (row) => formatDate(row.vencimento),
       },
       {
         key: 'responsavel',
         header: 'Responsável',
-        width: widths.responsavel,
         truncate: true,
         title: (row) =>
           row.escopo === 'CONJUNTA' ? 'Conjunta' : row.responsavelNome?.trim() || undefined,
@@ -385,7 +374,6 @@ export function DespesasPage() {
       {
         key: 'cartao',
         header: 'Cartão',
-        width: widths.cartao,
         truncate: true,
         title: (row) => row.cartaoNome ?? undefined,
         render: (row) => row.cartaoNome ?? '-',
@@ -393,7 +381,6 @@ export function DespesasPage() {
       {
         key: 'parcela',
         header: 'Parcela',
-        width: widths.parcela,
         align: 'right',
         priority: 'low',
         render: (row) =>
@@ -404,7 +391,6 @@ export function DespesasPage() {
       {
         key: 'pago',
         header: 'Status',
-        width: widths.status,
         render: (row) => <Badge paid={row.pago} />,
       },
       ...(canWrite
@@ -412,7 +398,6 @@ export function DespesasPage() {
             {
               key: 'actions',
               header: 'Ações',
-              width: DESPESAS_TABLE_WIDTHS.actions,
               priority: 'actions' as const,
               render: (row: Despesa) => (
                 <div className={styles.tableActions}>
@@ -458,8 +443,7 @@ export function DespesasPage() {
             },
           ]
         : []),
-    ]
-    },
+    ],
     [canWrite, pagoLoadingId, alternarPago, abrirEdicao],
   )
 
