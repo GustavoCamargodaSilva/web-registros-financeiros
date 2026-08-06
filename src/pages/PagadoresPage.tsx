@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { pagadoresApi } from '../api/pagadores.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
@@ -8,37 +8,23 @@ import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
+import { usePagadoresQuery } from '../hooks/queries/useFinanceQueries'
+import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
 import type { Pagador } from '../types/pagador.types'
 import styles from './pages.module.css'
 
 export function PagadoresPage() {
   const { showSuccess, handleError } = useApiFeedback()
   const { canWrite } = useAmbientePermissoes()
-  const [pagadores, setPagadores] = useState<Pagador[]>([])
+  const invalidate = useInvalidateFinanceQueries()
+  const pagadoresQuery = usePagadoresQuery()
+  const pagadores = pagadoresQuery.data ?? []
+  const listLoading = pagadoresQuery.isPending
+
   const [descricao, setDescricao] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [listLoading, setListLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Pagador | null>(null)
-
-  const loadPagadores = useCallback(async (mode: 'full' | 'background' = 'full') => {
-    if (mode === 'full') {
-      setListLoading(true)
-    }
-    try {
-      setPagadores(await pagadoresApi.listar())
-    } catch (error) {
-      handleError(error)
-    } finally {
-      if (mode === 'full') {
-        setListLoading(false)
-      }
-    }
-  }, [handleError])
-
-  useEffect(() => {
-    void loadPagadores()
-  }, [loadPagadores])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -64,7 +50,7 @@ export function PagadoresPage() {
       await pagadoresApi.cadastrar({ descricao: trimmed })
       setDescricao('')
       showSuccess('Pagador cadastrado com sucesso')
-      void loadPagadores('background')
+      await invalidate.pagadores()
     } catch (submitError) {
       handleError(submitError)
     } finally {
@@ -81,45 +67,48 @@ export function PagadoresPage() {
       await pagadoresApi.excluir(deleteTarget.id)
       showSuccess('Pagador excluído com sucesso')
       setDeleteTarget(null)
-      void loadPagadores('background')
+      await invalidate.pagadores()
     } catch (deleteError) {
       handleError(deleteError)
     }
   }
 
-  const columns: DataTableColumn<Pagador>[] = [
-    { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Pagador) => row.id },
-    {
-      key: 'descricao',
-      header: 'Descrição',
-      priority: 'primary',
-      render: (row: Pagador) => row.descricao,
-    },
-    ...(canWrite
-      ? [
-          {
-            key: 'actions',
-            header: 'Ações',
-            priority: 'actions' as const,
-            render: (row: Pagador) => (
-              <div className={styles.tableActions}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={styles.actionDanger}
-                  title="Excluir"
-                  aria-label="Excluir"
-                  onClick={() => setDeleteTarget(row)}
-                >
-                  <IconTrash />
-                </Button>
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ]
+  const columns = useMemo<DataTableColumn<Pagador>[]>(
+    () => [
+      { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Pagador) => row.id },
+      {
+        key: 'descricao',
+        header: 'Descrição',
+        priority: 'primary',
+        render: (row: Pagador) => row.descricao,
+      },
+      ...(canWrite
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              priority: 'actions' as const,
+              render: (row: Pagador) => (
+                <div className={styles.tableActions}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={styles.actionDanger}
+                    title="Excluir"
+                    aria-label="Excluir"
+                    onClick={() => setDeleteTarget(row)}
+                  >
+                    <IconTrash />
+                  </Button>
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [canWrite],
+  )
 
   return (
     <div className={styles.stack}>
@@ -146,7 +135,12 @@ export function PagadoresPage() {
       )}
 
       <Card title="Pagadores cadastrados">
-        <DataTable data={pagadores} columns={columns} loading={listLoading} />
+        <DataTable
+          data={pagadores}
+          columns={columns}
+          loading={listLoading}
+          getRowKey={(row) => row.id}
+        />
       </Card>
 
       <Modal

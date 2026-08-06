@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ambientesApi } from '../api/ambientes.api'
-import { cartoesApi } from '../api/cartoes.api'
-import { categoriasApi } from '../api/categorias.api'
+import { useQueryClient } from '@tanstack/react-query'
 import { despesasApi } from '../api/despesas.api'
 import { IconCheck, IconEdit, IconTrash } from '../components/layout/NavIcons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { DataTable } from '../components/ui/DataTable'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { Select } from '../components/ui/Select'
@@ -15,10 +13,15 @@ import { useAuth } from '../context/AuthContext'
 import { useCompetencia } from '../context/CompetenciaContext'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
-import type { Cartao } from '../types/cartao.types'
-import type { Categoria } from '../types/categoria.types'
+import {
+  useCartoesQuery,
+  useCategoriasQuery,
+  useDespesasCompetenciaQuery,
+  useMembrosAtivoQuery,
+} from '../hooks/queries/useFinanceQueries'
+import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
+import { queryKeys } from '../hooks/queries/queryKeys'
 import type { Despesa, EscopoDespesa, TipoDespesa } from '../types/despesa.types'
-import type { MembroAmbiente } from '../types/membro.types'
 import { filtrarDespesas, type FiltroEscopoDespesa } from '../utils/despesasFiltro'
 import { calcularResumoDespesas } from '../utils/despesasResumo'
 import { formatCompetencia, formatCurrency, formatDate } from '../utils/format'
@@ -95,49 +98,28 @@ export function DespesasPage() {
   const { usuario } = useAuth()
   const { canWrite } = useAmbientePermissoes()
   const { showSuccess, handleError } = useApiFeedback()
-  const [despesas, setDespesas] = useState<Despesa[]>([])
-  const [categorias, setCategorias] = useState<Categoria[]>([])
-  const [cartoes, setCartoes] = useState<Cartao[]>([])
-  const [membros, setMembros] = useState<MembroAmbiente[]>([])
+  const invalidate = useInvalidateFinanceQueries()
+  const queryClient = useQueryClient()
+  const despesasQuery = useDespesasCompetenciaQuery(ano, mes)
+  const categoriasQuery = useCategoriasQuery()
+  const cartoesQuery = useCartoesQuery()
+  const membrosQuery = useMembrosAtivoQuery()
+
+  const despesas = despesasQuery.data ?? []
+  const categorias = categoriasQuery.data ?? []
+  const cartoes = cartoesQuery.data ?? []
+  const membros = membrosQuery.data ?? []
+  const listLoading = despesasQuery.isPending
+
   const [form, setForm] = useState<FormState>(() => buildInitialForm(usuario?.id))
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [loading, setLoading] = useState(false)
-  const [listLoading, setListLoading] = useState(true)
   const [formAberto, setFormAberto] = useState(false)
   const [despesaEmEdicao, setDespesaEmEdicao] = useState<Despesa | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Despesa | null>(null)
   const [pagoLoadingId, setPagoLoadingId] = useState<number | null>(null)
   const [filtroEscopo, setFiltroEscopo] = useState<FiltroEscopoDespesa>('TODOS')
   const [filtroResponsavelId, setFiltroResponsavelId] = useState('')
-
-  const loadData = useCallback(async (mode: 'full' | 'background' = 'full') => {
-    if (mode === 'full') {
-      setListLoading(true)
-    }
-    try {
-      const [despesasResponse, categoriasResponse, cartoesResponse, membrosResponse] =
-        await Promise.all([
-          despesasApi.listarPorCompetencia(ano, mes),
-          categoriasApi.listar(),
-          cartoesApi.listar(),
-          ambientesApi.listarMembrosAtivo(),
-        ])
-      setDespesas(despesasResponse)
-      setCategorias(categoriasResponse)
-      setCartoes(cartoesResponse)
-      setMembros(membrosResponse)
-    } catch (error) {
-      handleError(error)
-    } finally {
-      if (mode === 'full') {
-        setListLoading(false)
-      }
-    }
-  }, [ano, mes, handleError])
-
-  useEffect(() => {
-    void loadData()
-  }, [loadData])
 
   useEffect(() => {
     setFormAberto(false)
@@ -187,12 +169,12 @@ export function DespesasPage() {
     setFormAberto(true)
   }
 
-  const abrirEdicao = (despesa: Despesa) => {
+  const abrirEdicao = useCallback((despesa: Despesa) => {
     setFormAberto(false)
     setErrors({})
     setDespesaEmEdicao(despesa)
     setForm(buildEditForm(despesa))
-  }
+  }, [])
 
   const validate = (isEdit: boolean) => {
     const nextErrors: Partial<Record<keyof FormState, string>> = {}
@@ -244,7 +226,7 @@ export function DespesasPage() {
       })
       fecharFormulario()
       showSuccess('Despesa cadastrada com sucesso')
-      void loadData('background')
+      await invalidate.despesas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {
@@ -275,7 +257,7 @@ export function DespesasPage() {
       })
       fecharFormulario()
       showSuccess('Despesa atualizada com sucesso')
-      void loadData('background')
+      await invalidate.despesas(ano, mes)
     } catch (error) {
       handleError(error)
     } finally {
@@ -326,25 +308,149 @@ export function DespesasPage() {
       if (excluindoSerieEditada) {
         fecharFormulario()
       }
-      void loadData('background')
+      await invalidate.despesas(ano, mes)
     } catch (error) {
       handleError(error)
     }
   }
 
-  const alternarPago = async (despesa: Despesa) => {
-    const novoPago = !despesa.pago
-    setPagoLoadingId(despesa.id)
-    try {
-      await despesasApi.atualizarPago(despesa.id, novoPago)
-      showSuccess(novoPago ? 'Despesa marcada como paga' : 'Despesa marcada como pendente')
-      void loadData('background')
-    } catch (error) {
-      handleError(error)
-    } finally {
-      setPagoLoadingId(null)
-    }
-  }
+  const alternarPago = useCallback(
+    async (despesa: Despesa) => {
+      const novoPago = !despesa.pago
+      const queryKey = queryKeys.despesas.competencia(ano, mes)
+      setPagoLoadingId(despesa.id)
+
+      const previous = queryClient.getQueryData<Despesa[]>(queryKey)
+      queryClient.setQueryData<Despesa[]>(queryKey, (old) =>
+        old?.map((item) => (item.id === despesa.id ? { ...item, pago: novoPago } : item)) ?? old,
+      )
+
+      try {
+        await despesasApi.atualizarPago(despesa.id, novoPago)
+        showSuccess(novoPago ? 'Despesa marcada como paga' : 'Despesa marcada como pendente')
+      } catch (error) {
+        queryClient.setQueryData(queryKey, previous)
+        handleError(error)
+      } finally {
+        setPagoLoadingId(null)
+      }
+    },
+    [ano, mes, queryClient, showSuccess, handleError],
+  )
+
+  const columns = useMemo<DataTableColumn<Despesa>[]>(
+    () => [
+      {
+        key: 'descricao',
+        header: 'Descrição',
+        width: '160px',
+        truncate: true,
+        priority: 'primary',
+        title: (row) => row.descricao,
+        render: (row) => row.descricao,
+      },
+      {
+        key: 'valor',
+        header: 'Valor',
+        width: '110px',
+        priority: 'primary',
+        render: (row) => (
+          <span className={styles.moneyExpense}>{formatCurrency(row.valor)}</span>
+        ),
+      },
+      {
+        key: 'vencimento',
+        header: 'Vencimento',
+        width: '110px',
+        render: (row) => formatDate(row.vencimento),
+      },
+      {
+        key: 'responsavel',
+        header: 'Responsável',
+        width: '18%',
+        truncate: true,
+        title: (row) =>
+          row.escopo === 'CONJUNTA' ? 'Conjunta' : row.responsavelNome?.trim() || undefined,
+        render: (row) => labelResponsavel(row),
+      },
+      {
+        key: 'cartao',
+        header: 'Cartão',
+        width: '110px',
+        truncate: true,
+        title: (row) => row.cartaoNome ?? undefined,
+        render: (row) => row.cartaoNome ?? '-',
+      },
+      {
+        key: 'parcela',
+        header: 'Parcela',
+        width: '90px',
+        priority: 'low',
+        render: (row) =>
+          row.totalParcelas && row.totalParcelas > 1
+            ? `${row.numeroParcela}/${row.totalParcelas}`
+            : '-',
+      },
+      {
+        key: 'pago',
+        header: 'Status',
+        width: '14%',
+        render: (row) => <Badge paid={row.pago} />,
+      },
+      ...(canWrite
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              width: '132px',
+              priority: 'actions' as const,
+              render: (row: Despesa) => (
+                <div className={styles.tableActions}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={row.pago ? styles.actionPaid : undefined}
+                    title={
+                      row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
+                    }
+                    aria-label={
+                      row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
+                    }
+                    disabled={pagoLoadingId === row.id}
+                    onClick={() => void alternarPago(row)}
+                  >
+                    <IconCheck />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    title="Editar"
+                    aria-label="Editar"
+                    onClick={() => abrirEdicao(row)}
+                  >
+                    <IconEdit />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={styles.actionDanger}
+                    title="Excluir"
+                    aria-label="Excluir"
+                    onClick={() => setDeleteTarget(row)}
+                  >
+                    <IconTrash />
+                  </Button>
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [canWrite, pagoLoadingId, alternarPago, abrirEdicao],
+  )
 
   return (
     <div className={styles.stack}>
@@ -605,119 +711,9 @@ export function DespesasPage() {
         <DataTable
           data={despesasFiltradas}
           loading={listLoading}
+          getRowKey={(row) => row.id}
           emptyMessage="Nenhuma despesa neste mês. Cadastre a primeira."
-          columns={[
-            {
-              key: 'descricao',
-              header: 'Descrição',
-              width: '160px',
-              truncate: true,
-              priority: 'primary',
-              title: (row) => row.descricao,
-              render: (row) => row.descricao,
-            },
-            {
-              key: 'valor',
-              header: 'Valor',
-              width: '110px',
-              priority: 'primary',
-              render: (row) => (
-                <span className={styles.moneyExpense}>{formatCurrency(row.valor)}</span>
-              ),
-            },
-            {
-              key: 'vencimento',
-              header: 'Vencimento',
-              width: '110px',
-              render: (row) => formatDate(row.vencimento),
-            },
-            {
-              key: 'responsavel',
-              header: 'Responsável',
-              width: '18%',
-              truncate: true,
-              title: (row) =>
-                row.escopo === 'CONJUNTA'
-                  ? 'Conjunta'
-                  : row.responsavelNome?.trim() || undefined,
-              render: (row) => labelResponsavel(row),
-            },
-            {
-              key: 'cartao',
-              header: 'Cartão',
-              width: '110px',
-              truncate: true,
-              title: (row) => row.cartaoNome ?? undefined,
-              render: (row) => row.cartaoNome ?? '-',
-            },
-            {
-              key: 'parcela',
-              header: 'Parcela',
-              width: '90px',
-              priority: 'low',
-              render: (row) =>
-                row.totalParcelas && row.totalParcelas > 1
-                  ? `${row.numeroParcela}/${row.totalParcelas}`
-                  : '-',
-            },
-            {
-              key: 'pago',
-              header: 'Status',
-              width: '14%',
-              render: (row) => <Badge paid={row.pago} />,
-            },
-            ...(canWrite
-              ? [
-                  {
-                    key: 'actions',
-                    header: 'Ações',
-                    width: '132px',
-                    priority: 'actions' as const,
-                    render: (row: Despesa) => (
-                      <div className={styles.tableActions}>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className={row.pago ? styles.actionPaid : undefined}
-                          title={
-                            row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
-                          }
-                          aria-label={
-                            row.pago ? 'Marcar este mês como pendente' : 'Marcar este mês como pago'
-                          }
-                          disabled={pagoLoadingId === row.id}
-                          onClick={() => void alternarPago(row)}
-                        >
-                          <IconCheck />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          title="Editar"
-                          aria-label="Editar"
-                          onClick={() => abrirEdicao(row)}
-                        >
-                          <IconEdit />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className={styles.actionDanger}
-                          title="Excluir"
-                          aria-label="Excluir"
-                          onClick={() => setDeleteTarget(row)}
-                        >
-                          <IconTrash />
-                        </Button>
-                      </div>
-                    ),
-                  },
-                ]
-              : []),
-          ]}
+          columns={columns}
         />
       </Card>
 

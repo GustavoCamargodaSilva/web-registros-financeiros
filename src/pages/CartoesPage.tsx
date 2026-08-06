@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { cartoesApi } from '../api/cartoes.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
@@ -8,37 +8,23 @@ import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
+import { useCartoesQuery } from '../hooks/queries/useFinanceQueries'
+import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
 import type { Cartao } from '../types/cartao.types'
 import styles from './pages.module.css'
 
 export function CartoesPage() {
   const { showSuccess, handleError } = useApiFeedback()
   const { canWrite } = useAmbientePermissoes()
-  const [cartoes, setCartoes] = useState<Cartao[]>([])
+  const invalidate = useInvalidateFinanceQueries()
+  const cartoesQuery = useCartoesQuery()
+  const cartoes = cartoesQuery.data ?? []
+  const listLoading = cartoesQuery.isPending
+
   const [nome, setNome] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [listLoading, setListLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Cartao | null>(null)
-
-  const loadCartoes = useCallback(async (mode: 'full' | 'background' = 'full') => {
-    if (mode === 'full') {
-      setListLoading(true)
-    }
-    try {
-      setCartoes(await cartoesApi.listar())
-    } catch (loadError) {
-      handleError(loadError)
-    } finally {
-      if (mode === 'full') {
-        setListLoading(false)
-      }
-    }
-  }, [handleError])
-
-  useEffect(() => {
-    void loadCartoes()
-  }, [loadCartoes])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -64,7 +50,7 @@ export function CartoesPage() {
       await cartoesApi.cadastrar({ nome: trimmed })
       setNome('')
       showSuccess('Cartão cadastrado com sucesso')
-      void loadCartoes('background')
+      await invalidate.cartoes()
     } catch (submitError) {
       handleError(submitError)
     } finally {
@@ -81,45 +67,48 @@ export function CartoesPage() {
       await cartoesApi.excluir(deleteTarget.id)
       showSuccess('Cartão excluído com sucesso')
       setDeleteTarget(null)
-      void loadCartoes('background')
+      await invalidate.cartoes()
     } catch (deleteError) {
       handleError(deleteError)
     }
   }
 
-  const columns: DataTableColumn<Cartao>[] = [
-    { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Cartao) => row.id },
-    {
-      key: 'nome',
-      header: 'Nome',
-      priority: 'primary',
-      render: (row: Cartao) => row.nome,
-    },
-    ...(canWrite
-      ? [
-          {
-            key: 'actions',
-            header: 'Ações',
-            priority: 'actions' as const,
-            render: (row: Cartao) => (
-              <div className={styles.tableActions}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={styles.actionDanger}
-                  title="Excluir"
-                  aria-label="Excluir"
-                  onClick={() => setDeleteTarget(row)}
-                >
-                  <IconTrash />
-                </Button>
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ]
+  const columns = useMemo<DataTableColumn<Cartao>[]>(
+    () => [
+      { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Cartao) => row.id },
+      {
+        key: 'nome',
+        header: 'Nome',
+        priority: 'primary',
+        render: (row: Cartao) => row.nome,
+      },
+      ...(canWrite
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              priority: 'actions' as const,
+              render: (row: Cartao) => (
+                <div className={styles.tableActions}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={styles.actionDanger}
+                    title="Excluir"
+                    aria-label="Excluir"
+                    onClick={() => setDeleteTarget(row)}
+                  >
+                    <IconTrash />
+                  </Button>
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [canWrite],
+  )
 
   return (
     <div className={styles.stack}>
@@ -147,7 +136,12 @@ export function CartoesPage() {
       )}
 
       <Card title="Cartões cadastrados">
-        <DataTable data={cartoes} columns={columns} loading={listLoading} />
+        <DataTable
+          data={cartoes}
+          columns={columns}
+          loading={listLoading}
+          getRowKey={(row) => row.id}
+        />
       </Card>
 
       <Modal

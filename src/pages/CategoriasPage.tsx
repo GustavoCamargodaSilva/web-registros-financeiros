@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { categoriasApi } from '../api/categorias.api'
 import { IconTrash } from '../components/layout/NavIcons'
 import { Button } from '../components/ui/Button'
@@ -8,37 +8,23 @@ import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAmbientePermissoes } from '../hooks/useAmbientePermissoes'
 import { useApiFeedback } from '../hooks/useApiFeedback'
+import { useCategoriasQuery } from '../hooks/queries/useFinanceQueries'
+import { useInvalidateFinanceQueries } from '../hooks/queries/useInvalidateFinanceQueries'
 import type { Categoria } from '../types/categoria.types'
 import styles from './pages.module.css'
 
 export function CategoriasPage() {
   const { showSuccess, handleError } = useApiFeedback()
   const { canWrite } = useAmbientePermissoes()
-  const [categorias, setCategorias] = useState<Categoria[]>([])
+  const invalidate = useInvalidateFinanceQueries()
+  const categoriasQuery = useCategoriasQuery()
+  const categorias = categoriasQuery.data ?? []
+  const listLoading = categoriasQuery.isPending
+
   const [descricao, setDescricao] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [listLoading, setListLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Categoria | null>(null)
-
-  const loadCategorias = useCallback(async (mode: 'full' | 'background' = 'full') => {
-    if (mode === 'full') {
-      setListLoading(true)
-    }
-    try {
-      setCategorias(await categoriasApi.listar())
-    } catch (loadError) {
-      handleError(loadError)
-    } finally {
-      if (mode === 'full') {
-        setListLoading(false)
-      }
-    }
-  }, [handleError])
-
-  useEffect(() => {
-    void loadCategorias()
-  }, [loadCategorias])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -64,7 +50,7 @@ export function CategoriasPage() {
       await categoriasApi.cadastrar({ descricao: trimmed })
       setDescricao('')
       showSuccess('Categoria cadastrada com sucesso')
-      void loadCategorias('background')
+      await invalidate.categorias()
     } catch (submitError) {
       handleError(submitError)
     } finally {
@@ -81,45 +67,48 @@ export function CategoriasPage() {
       await categoriasApi.excluir(deleteTarget.id)
       showSuccess('Categoria excluída com sucesso')
       setDeleteTarget(null)
-      void loadCategorias('background')
+      await invalidate.categorias()
     } catch (deleteError) {
       handleError(deleteError)
     }
   }
 
-  const columns: DataTableColumn<Categoria>[] = [
-    { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Categoria) => row.id },
-    {
-      key: 'descricao',
-      header: 'Descrição',
-      priority: 'primary',
-      render: (row: Categoria) => row.descricao,
-    },
-    ...(canWrite
-      ? [
-          {
-            key: 'actions',
-            header: 'Ações',
-            priority: 'actions' as const,
-            render: (row: Categoria) => (
-              <div className={styles.tableActions}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={styles.actionDanger}
-                  title="Excluir"
-                  aria-label="Excluir"
-                  onClick={() => setDeleteTarget(row)}
-                >
-                  <IconTrash />
-                </Button>
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ]
+  const columns = useMemo<DataTableColumn<Categoria>[]>(
+    () => [
+      { key: 'id', header: 'ID', hideOnMobile: true, render: (row: Categoria) => row.id },
+      {
+        key: 'descricao',
+        header: 'Descrição',
+        priority: 'primary',
+        render: (row: Categoria) => row.descricao,
+      },
+      ...(canWrite
+        ? [
+            {
+              key: 'actions',
+              header: 'Ações',
+              priority: 'actions' as const,
+              render: (row: Categoria) => (
+                <div className={styles.tableActions}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={styles.actionDanger}
+                    title="Excluir"
+                    aria-label="Excluir"
+                    onClick={() => setDeleteTarget(row)}
+                  >
+                    <IconTrash />
+                  </Button>
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [canWrite],
+  )
 
   return (
     <div className={styles.stack}>
@@ -146,7 +135,12 @@ export function CategoriasPage() {
       )}
 
       <Card title="Categorias cadastradas">
-        <DataTable data={categorias} columns={columns} loading={listLoading} />
+        <DataTable
+          data={categorias}
+          columns={columns}
+          loading={listLoading}
+          getRowKey={(row) => row.id}
+        />
       </Card>
 
       <Modal
