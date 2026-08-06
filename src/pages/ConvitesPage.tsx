@@ -52,6 +52,7 @@ export function ConvitesPage() {
       {
         key: 'nome',
         header: 'Nome',
+        width: isDono ? '40%' : '50%',
         truncate: true,
         priority: 'primary',
         title: (row) => row.nome,
@@ -60,6 +61,7 @@ export function ConvitesPage() {
       {
         key: 'papel',
         header: 'Papel',
+        width: isDono ? '35%' : '50%',
         render: (row) => labelPapel(row.papel),
       },
       ...(isDono
@@ -67,6 +69,7 @@ export function ConvitesPage() {
             {
               key: 'actions',
               header: 'Ações',
+              width: '25%',
               priority: 'actions' as const,
               render: (row: MembroAmbiente) =>
                 row.papel === 'EDITOR' || row.papel === 'LEITOR' ? (

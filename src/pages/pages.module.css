@@ -44,7 +44,6 @@
 .tableActions {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
 }
 
@@ -100,12 +99,8 @@
 
 .filtrosRow {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(180px, 260px));
   gap: var(--spacing-md);
-}
-
-.filtrosRow > * {
-  min-width: 0;
 }
 
 @media (max-width: 640px) {

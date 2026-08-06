@@ -67,36 +67,6 @@ describe('DataTable', () => {
     expect(screen.getByText('Nada aqui.')).toBeInTheDocument()
   })
 
-  it('distribui colunas com a mesma largura por padrão (layout equal)', () => {
-    setViewportWidth(1280)
-
-    const { container } = render(<DataTable data={data} columns={columns} />)
-
-    const cols = container.querySelectorAll('colgroup col')
-    expect(cols).toHaveLength(4)
-    expect(cols[0]?.getAttribute('style')).toContain('width: 25%')
-    expect(cols[3]?.getAttribute('style')).toContain('width: 25%')
-    expect(container.querySelector('table')?.className).toContain('tableEqual')
-  })
-
-  it('respeita larguras declaradas quando columnLayout é auto', () => {
-    setViewportWidth(1280)
-
-    const columnsWithWidth: DataTableColumn<Row>[] = [
-      { key: 'nome', header: 'Nome', width: '22%', render: (row) => row.nome },
-      { key: 'valor', header: 'Valor', width: '10%', align: 'right', render: (row) => row.valor },
-    ]
-
-    const { container } = render(
-      <DataTable data={data} columns={columnsWithWidth} columnLayout="auto" />,
-    )
-
-    const cols = container.querySelectorAll('colgroup col')
-    expect(cols).toHaveLength(2)
-    expect(cols[0]?.getAttribute('style')).toContain('width: 22%')
-    expect(cols[1]?.getAttribute('style')).toContain('width: 10%')
-  })
-
   it('com loading não mostra empty state nem dados', () => {
     setViewportWidth(1280)
 

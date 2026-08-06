@@ -1,6 +1,6 @@
 # Levantamento — Barras e colunas harmonizadas (tabelas, filtros e formulários)
 
-> **Status:** Implementado em 05/08/2026.
+> **Status:** Implementação **revertida** em 05/08/2026 — alterações de alinhamento retiradas do código; documento mantido como referência.
 > **Data:** 05/08/2026
 > **Escopo:** Harmonizar larguras das “barras” horizontais do front (`web-registros-financeiros`): cabeçalhos de tabela, linhas de filtro e grades de formulário, com comportamento responsivo consistente em todas as telas.
 > **Referência visual:** cabeçalho da tabela de Despesas com colunas desalinhadas (marcado em amarelo pelo usuário).

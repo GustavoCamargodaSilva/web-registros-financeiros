@@ -131,19 +131,6 @@
   --z-modal: 900;
   --z-toast: 1000;
 
-  /*
-   * Larguras de coluna de tabela (desktop) — espelham src/constants/tableColumnWidths.ts.
-   * Usadas em documentação e, se necessário, em CSS customizado.
-   */
-  --table-col-text-primary: 20%;
-  --table-col-text-secondary: 15%;
-  --table-col-text-tertiary: 13%;
-  --table-col-money: 10%;
-  --table-col-date: 11%;
-  --table-col-status: 10%;
-  --table-col-short: 8%;
-  --table-col-actions: 13%;
-
   /* Type — DM Sans loaded in global.css */
   --font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
 

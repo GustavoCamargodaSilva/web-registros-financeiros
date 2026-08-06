@@ -343,6 +343,7 @@ export function DespesasPage() {
       {
         key: 'descricao',
         header: 'Descrição',
+        width: '160px',
         truncate: true,
         priority: 'primary',
         title: (row) => row.descricao,
@@ -351,7 +352,7 @@ export function DespesasPage() {
       {
         key: 'valor',
         header: 'Valor',
-        align: 'right',
+        width: '110px',
         priority: 'primary',
         render: (row) => (
           <span className={styles.moneyExpense}>{formatCurrency(row.valor)}</span>
@@ -360,12 +361,13 @@ export function DespesasPage() {
       {
         key: 'vencimento',
         header: 'Vencimento',
-        align: 'right',
+        width: '110px',
         render: (row) => formatDate(row.vencimento),
       },
       {
         key: 'responsavel',
         header: 'Responsável',
+        width: '18%',
         truncate: true,
         title: (row) =>
           row.escopo === 'CONJUNTA' ? 'Conjunta' : row.responsavelNome?.trim() || undefined,
@@ -374,6 +376,7 @@ export function DespesasPage() {
       {
         key: 'cartao',
         header: 'Cartão',
+        width: '110px',
         truncate: true,
         title: (row) => row.cartaoNome ?? undefined,
         render: (row) => row.cartaoNome ?? '-',
@@ -381,7 +384,7 @@ export function DespesasPage() {
       {
         key: 'parcela',
         header: 'Parcela',
-        align: 'right',
+        width: '90px',
         priority: 'low',
         render: (row) =>
           row.totalParcelas && row.totalParcelas > 1
@@ -391,6 +394,7 @@ export function DespesasPage() {
       {
         key: 'pago',
         header: 'Status',
+        width: '14%',
         render: (row) => <Badge paid={row.pago} />,
       },
       ...(canWrite
@@ -398,6 +402,7 @@ export function DespesasPage() {
             {
               key: 'actions',
               header: 'Ações',
+              width: '132px',
               priority: 'actions' as const,
               render: (row: Despesa) => (
                 <div className={styles.tableActions}>
@@ -575,62 +580,6 @@ export function DespesasPage() {
               error={errors.vencimento}
               onChange={(event) => setForm((current) => ({ ...current, vencimento: event.target.value }))}
             />
-            <Select
-              label="Escopo"
-              name="escopo"
-              value={form.escopo}
-              error={errors.escopo}
-              options={[
-                { value: 'INDIVIDUAL', label: 'Individual' },
-                { value: 'CONJUNTA', label: 'Conjunta' },
-              ]}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  escopo: event.target.value as EscopoDespesa,
-                  responsavelUsuarioId:
-                    event.target.value === 'CONJUNTA'
-                      ? ''
-                      : current.responsavelUsuarioId || String(usuario?.id ?? ''),
-                }))
-              }
-            />
-            <Select
-              label="Pago"
-              name="pago"
-              value={form.pago}
-              error={errors.pago}
-              placeholder="Selecione"
-              options={[
-                { value: 'true', label: 'Sim' },
-                { value: 'false', label: 'Não' },
-              ]}
-              onChange={(event) => setForm((current) => ({ ...current, pago: event.target.value }))}
-            />
-            <Select
-              label="Categoria"
-              name="categoriaId"
-              value={form.categoriaId}
-              error={errors.categoriaId}
-              placeholder="Selecione"
-              options={categorias.map((categoria) => ({
-                value: categoria.id,
-                label: categoria.descricao,
-              }))}
-              onChange={(event) => setForm((current) => ({ ...current, categoriaId: event.target.value }))}
-            />
-            <Select
-              label="Cartão (opcional)"
-              name="cartaoId"
-              value={form.cartaoId}
-              error={errors.cartaoId}
-              placeholder="Sem cartão"
-              options={cartoes.map((cartao) => ({
-                value: cartao.id,
-                label: cartao.nome,
-              }))}
-              onChange={(event) => setForm((current) => ({ ...current, cartaoId: event.target.value }))}
-            />
             {!editando ? (
               <Select
                 label="Tipo"
@@ -674,6 +623,26 @@ export function DespesasPage() {
                 }
               />
             ) : null}
+            <Select
+              label="Escopo"
+              name="escopo"
+              value={form.escopo}
+              error={errors.escopo}
+              options={[
+                { value: 'INDIVIDUAL', label: 'Individual' },
+                { value: 'CONJUNTA', label: 'Conjunta' },
+              ]}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  escopo: event.target.value as EscopoDespesa,
+                  responsavelUsuarioId:
+                    event.target.value === 'CONJUNTA'
+                      ? ''
+                      : current.responsavelUsuarioId || String(usuario?.id ?? ''),
+                }))
+              }
+            />
             {form.escopo === 'INDIVIDUAL' ? (
               <Select
                 label="Responsável"
@@ -690,6 +659,42 @@ export function DespesasPage() {
                 }
               />
             ) : null}
+            <Select
+              label="Pago"
+              name="pago"
+              value={form.pago}
+              error={errors.pago}
+              placeholder="Selecione"
+              options={[
+                { value: 'true', label: 'Sim' },
+                { value: 'false', label: 'Não' },
+              ]}
+              onChange={(event) => setForm((current) => ({ ...current, pago: event.target.value }))}
+            />
+            <Select
+              label="Categoria"
+              name="categoriaId"
+              value={form.categoriaId}
+              error={errors.categoriaId}
+              placeholder="Selecione"
+              options={categorias.map((categoria) => ({
+                value: categoria.id,
+                label: categoria.descricao,
+              }))}
+              onChange={(event) => setForm((current) => ({ ...current, categoriaId: event.target.value }))}
+            />
+            <Select
+              label="Cartão (opcional)"
+              name="cartaoId"
+              value={form.cartaoId}
+              error={errors.cartaoId}
+              placeholder="Sem cartão"
+              options={cartoes.map((cartao) => ({
+                value: cartao.id,
+                label: cartao.nome,
+              }))}
+              onChange={(event) => setForm((current) => ({ ...current, cartaoId: event.target.value }))}
+            />
             <div className={styles.formActions}>
               <Button type="button" variant="outline" onClick={fecharFormulario} disabled={loading}>
                 Cancelar
