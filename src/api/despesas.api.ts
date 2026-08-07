@@ -1,11 +1,14 @@
 import { apiRequest } from './client'
 import type { Despesa, DespesaRequest, DespesaUpdateRequest } from '../types/despesa.types'
+import type { SerieAnualTotais } from '../types/serieAnual.types'
 
 const BASE = '/api/v1/despesas'
 
 export const despesasApi = {
   listarPorCompetencia: (ano: number, mes: number) =>
     apiRequest<Despesa[]>(`${BASE}?ano=${ano}&mes=${mes}`),
+  listarTotaisAnuais: (ano: number) =>
+    apiRequest<SerieAnualTotais>(`${BASE}/totais-anuais?ano=${ano}`),
   cadastrar: (data: DespesaRequest) =>
     apiRequest<void>(BASE, { method: 'POST', body: JSON.stringify(data) }),
   atualizar: (id: number, data: DespesaUpdateRequest) =>

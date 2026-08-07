@@ -27,13 +27,21 @@ export function useInvalidateFinanceQueries() {
       [queryClient],
     ),
     despesas: useCallback(
-      (ano: number, mes: number) =>
-        queryClient.invalidateQueries({ queryKey: queryKeys.despesas.competencia(ano, mes) }),
+      async (ano: number, mes: number) => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.despesas.competencia(ano, mes) }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.despesas.totaisAnuais(ano) }),
+        ])
+      },
       [queryClient],
     ),
     receitas: useCallback(
-      (ano: number, mes: number) =>
-        queryClient.invalidateQueries({ queryKey: queryKeys.receitas.competencia(ano, mes) }),
+      async (ano: number, mes: number) => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.receitas.competencia(ano, mes) }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.receitas.totaisAnuais(ano) }),
+        ])
+      },
       [queryClient],
     ),
   }

@@ -1,0 +1,64 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-primary-text);
+}
+
+.variacao {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.variacao_alta {
+  color: var(--color-danger);
+}
+
+.variacao_baixa {
+  color: var(--color-success);
+}
+
+.variacao_neutra {
+  color: var(--color-text-muted);
+}
+
+.chartBlock + .chartBlock {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.chartTitle {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.chartWrap {
+  width: 100%;
+  min-height: 220px;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.skeletonChart {
+  display: block;
+  width: 100%;
+  height: 160px;
+  margin-top: 12px;
+}

@@ -5,12 +5,15 @@ import type {
   ReceitaRequest,
   ReceitaUpdateRequest,
 } from '../types/receita.types'
+import type { SerieAnualTotais } from '../types/serieAnual.types'
 
 const BASE = '/api/v1/receitas'
 
 export const receitasApi = {
   listarPorCompetencia: (ano: number, mes: number) =>
     apiRequest<ReceitaCompetenciaResponse>(`${BASE}?ano=${ano}&mes=${mes}`),
+  listarTotaisAnuais: (ano: number) =>
+    apiRequest<SerieAnualTotais>(`${BASE}/totais-anuais?ano=${ano}`),
   cadastrar: (data: ReceitaRequest) =>
     apiRequest<void>(BASE, { method: 'POST', body: JSON.stringify(data) }),
   atualizar: (id: number, data: ReceitaUpdateRequest) =>
