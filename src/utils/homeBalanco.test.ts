@@ -33,7 +33,7 @@ function despesa(partial: Partial<Despesa> & Pick<Despesa, 'id' | 'valor' | 'esc
 }
 
 describe('calcularBalancoMes', () => {
-  it('soma entradas e saídas do mês', () => {
+  it('soma entradas e saídas e calcula disponível e percentual', () => {
     const balanco = calcularBalancoMes(
       [receita({ id: 1, valor: 3000 }), receita({ id: 2, valor: 500 })],
       [
@@ -44,9 +44,53 @@ describe('calcularBalancoMes', () => {
 
     expect(balanco.totalEntradas).toBe(3500)
     expect(balanco.totalSaidas).toBe(1200)
+    expect(balanco.disponivel).toBe(2300)
+    expect(balanco.percentualDaRenda).toBeCloseTo((1200 / 3500) * 100, 5)
+    expect(balanco.alerta).toBe(false)
   })
 
-  it('retorna zeros sem lançamentos', () => {
-    expect(calcularBalancoMes([], [])).toEqual({ totalEntradas: 0, totalSaidas: 0 })
+  it('reproduz o exemplo 8,49% da renda', () => {
+    const balanco = calcularBalancoMes(
+      [receita({ id: 1, valor: 50_000 })],
+      [despesa({ id: 1, valor: 4_243, escopo: 'INDIVIDUAL' })],
+    )
+
+    expect(balanco.disponivel).toBe(45_757)
+    expect(balanco.percentualDaRenda).toBeCloseTo(8.486, 3)
+    expect(balanco.alerta).toBe(false)
+  })
+
+  it('retorna zeros sem lançamentos sem alerta', () => {
+    expect(calcularBalancoMes([], [])).toEqual({
+      totalEntradas: 0,
+      totalSaidas: 0,
+      disponivel: 0,
+      percentualDaRenda: null,
+      alerta: false,
+    })
+  })
+
+  it('renda zero com gastos: percentual nulo e alerta', () => {
+    const balanco = calcularBalancoMes(
+      [],
+      [despesa({ id: 1, valor: 100, escopo: 'INDIVIDUAL' })],
+    )
+
+    expect(balanco.totalEntradas).toBe(0)
+    expect(balanco.totalSaidas).toBe(100)
+    expect(balanco.disponivel).toBe(-100)
+    expect(balanco.percentualDaRenda).toBeNull()
+    expect(balanco.alerta).toBe(true)
+  })
+
+  it('gastos acima da renda: percentual acima de 100 e alerta', () => {
+    const balanco = calcularBalancoMes(
+      [receita({ id: 1, valor: 1000 })],
+      [despesa({ id: 1, valor: 1500, escopo: 'INDIVIDUAL' })],
+    )
+
+    expect(balanco.disponivel).toBe(-500)
+    expect(balanco.percentualDaRenda).toBeCloseTo(150, 5)
+    expect(balanco.alerta).toBe(true)
   })
 })
