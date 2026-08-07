@@ -7,6 +7,7 @@ import { pagadoresApi } from '../../api/pagadores.api'
 import { receitasApi } from '../../api/receitas.api'
 import type { Despesa } from '../../types/despesa.types'
 import type { ReceitaCompetenciaResponse } from '../../types/receita.types'
+import type { SerieAnualTotais } from '../../types/serieAnual.types'
 import type { Ambiente } from '../../types/ambiente.types'
 import type { Categoria } from '../../types/categoria.types'
 import type { Cartao } from '../../types/cartao.types'
@@ -71,5 +72,19 @@ export function useReceitasCompetenciaQuery(ano: number, mes: number) {
   return useQueryWithFeedback<ReceitaCompetenciaResponse>({
     queryKey: queryKeys.receitas.competencia(ano, mes),
     queryFn: () => receitasApi.listarPorCompetencia(ano, mes),
+  })
+}
+
+export function useDespesasTotaisAnuaisQuery(ano: number) {
+  return useQueryWithFeedback<SerieAnualTotais>({
+    queryKey: queryKeys.despesas.totaisAnuais(ano),
+    queryFn: () => despesasApi.listarTotaisAnuais(ano),
+  })
+}
+
+export function useReceitasTotaisAnuaisQuery(ano: number) {
+  return useQueryWithFeedback<SerieAnualTotais>({
+    queryKey: queryKeys.receitas.totaisAnuais(ano),
+    queryFn: () => receitasApi.listarTotaisAnuais(ano),
   })
 }

@@ -16,8 +16,10 @@ export const queryKeys = {
   },
   despesas: {
     competencia: (ano: number, mes: number) => ['despesas', ano, mes] as const,
+    totaisAnuais: (ano: number) => ['despesas', 'totais-anuais', ano] as const,
   },
   receitas: {
     competencia: (ano: number, mes: number) => ['receitas', ano, mes] as const,
+    totaisAnuais: (ano: number) => ['receitas', 'totais-anuais', ano] as const,
   },
 }
