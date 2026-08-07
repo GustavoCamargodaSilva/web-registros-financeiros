@@ -15,6 +15,14 @@ export function formatPercent(value: number): string {
   })}%`
 }
 
+/** Percentual com exatamente 2 casas (ex.: comprometimento da renda na Home). */
+export function formatPercentFixed2(value: number): string {
+  return `${value.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}%`
+}
+
 /**
  * Tick de eixo em escala compacta pt-BR: `800`, `1 mil`, `1,2 mil`.
  * Não usa moeda — só para eixos de gráfico.
