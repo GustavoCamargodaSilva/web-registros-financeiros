@@ -112,7 +112,7 @@
   align-items: center;
   gap: 8px;
   min-height: 38px;
-  padding: 8px 10px 8px 38px;
+  padding: 8px 10px 8px 6px;
   border-radius: var(--radius-sm);
   color: var(--color-text);
   font-size: 14px;

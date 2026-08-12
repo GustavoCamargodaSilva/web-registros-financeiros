@@ -153,6 +153,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                           .join(' ')
                       }
                     >
+                      <span className={styles.topLinkSpacer} aria-hidden />
                       <span className={styles.icon}>{link.icon}</span>
                       <span>{link.label}</span>
                     </NavLink>
