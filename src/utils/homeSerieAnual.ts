@@ -6,6 +6,13 @@ export interface PontoSerieMensal {
   total: number
 }
 
+export interface PontoSerieMensalMista {
+  mes: number
+  label: string
+  receitas: number
+  despesas: number
+}
+
 export interface VariacaoTotalAno {
   totalAtual: number
   totalAnterior: number
@@ -61,6 +68,32 @@ export function montarPontosSerie(
     label: MESES_LABEL[item.mes - 1] ?? String(item.mes),
     total: item.total,
   }))
+}
+
+/** Une receitas e despesas no mesmo eixo mensal (1…mesLimite). */
+export function montarPontosSerieMista(
+  totaisReceitas: TotalMensal[],
+  totaisDespesas: TotalMensal[],
+  mesLimite: number,
+): PontoSerieMensalMista[] {
+  if (mesLimite <= 0) return []
+
+  const mapaReceitas = new Map(
+    cortarSerieMensal(totaisReceitas, mesLimite).map((item) => [item.mes, item.total]),
+  )
+  const mapaDespesas = new Map(
+    cortarSerieMensal(totaisDespesas, mesLimite).map((item) => [item.mes, item.total]),
+  )
+
+  return Array.from({ length: mesLimite }, (_, i) => {
+    const mes = i + 1
+    return {
+      mes,
+      label: MESES_LABEL[mes - 1] ?? String(mes),
+      receitas: mapaReceitas.get(mes) ?? 0,
+      despesas: mapaDespesas.get(mes) ?? 0,
+    }
+  })
 }
 
 export function calcularVariacaoTotalAno(

@@ -4,6 +4,7 @@ import {
   cortarSerieMensal,
   mesLimiteSerieAnual,
   montarPontosSerie,
+  montarPontosSerieMista,
   somarTotaisAteMes,
 } from './homeSerieAnual'
 
@@ -52,6 +53,30 @@ describe('cortarSerieMensal / montarPontosSerie', () => {
 describe('somarTotaisAteMes', () => {
   it('soma até o mês limite', () => {
     expect(somarTotaisAteMes(totais, 3)).toBe(350)
+  })
+})
+
+describe('montarPontosSerieMista', () => {
+  const receitas = [
+    { mes: 1, total: 3000 },
+    { mes: 2, total: 2800 },
+    { mes: 3, total: 3100 },
+  ]
+  const despesas = [
+    { mes: 1, total: 1200 },
+    { mes: 3, total: 1500 },
+  ]
+
+  it('une receitas e despesas por mês até o limite', () => {
+    expect(montarPontosSerieMista(receitas, despesas, 3)).toEqual([
+      { mes: 1, label: 'JAN', receitas: 3000, despesas: 1200 },
+      { mes: 2, label: 'FEV', receitas: 2800, despesas: 0 },
+      { mes: 3, label: 'MAR', receitas: 3100, despesas: 1500 },
+    ])
+  })
+
+  it('retorna vazio quando mesLimite é 0', () => {
+    expect(montarPontosSerieMista(receitas, despesas, 0)).toEqual([])
   })
 })
 

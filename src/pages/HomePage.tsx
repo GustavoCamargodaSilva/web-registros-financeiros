@@ -13,7 +13,7 @@ import { calcularGastosPorCategoria } from '../utils/homeGastosPorCategoria'
 import {
   calcularVariacaoTotalAno,
   mesLimiteSerieAnual,
-  montarPontosSerie,
+  montarPontosSerieMista,
   somarTotaisAteMes,
 } from '../utils/homeSerieAnual'
 import { HomeDespesasPorCategoria } from './HomeDespesasPorCategoria'
@@ -39,7 +39,6 @@ function HomeSkeleton() {
       <div className={styles.fullWidth}>
         <Card>
           <h2 className={styles.sectionTitle}>Evolução anual</h2>
-          <span className={`skeleton ${styles.skeletonChart}`} />
           <span className={`skeleton ${styles.skeletonChart}`} />
         </Card>
       </div>
@@ -85,8 +84,7 @@ export function HomePage() {
     const totalAnterior = somarTotaisAteMes(totaisDespesasAnterior, mesLimite)
 
     return {
-      pontosReceitas: montarPontosSerie(totaisReceitas, mesLimite),
-      pontosDespesas: montarPontosSerie(totaisDespesas, mesLimite),
+      pontos: montarPontosSerieMista(totaisReceitas, totaisDespesas, mesLimite),
       variacaoDespesas: calcularVariacaoTotalAno(totalAtual, totalAnterior),
     }
   }, [ano, receitasAnoQuery.data, despesasAnoQuery.data, despesasAnoAnteriorQuery.data])
@@ -110,8 +108,7 @@ export function HomePage() {
       <div className={styles.fullWidth}>
         <HomeSerieAnual
           ano={ano}
-          pontosReceitas={serie.pontosReceitas}
-          pontosDespesas={serie.pontosDespesas}
+          pontos={serie.pontos}
           variacaoDespesas={serie.variacaoDespesas}
           loading={serieLoading}
         />
