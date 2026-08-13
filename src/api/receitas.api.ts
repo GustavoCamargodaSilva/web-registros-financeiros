@@ -1,4 +1,5 @@
 import { apiRequest } from './client'
+import type { AgrupamentoReceita, AgregadosCompetencia } from '../types/agregados.types'
 import type {
   Receita,
   ReceitaCompetenciaResponse,
@@ -12,8 +13,17 @@ const BASE = '/api/v1/receitas'
 export const receitasApi = {
   listarPorCompetencia: (ano: number, mes: number) =>
     apiRequest<ReceitaCompetenciaResponse>(`${BASE}?ano=${ano}&mes=${mes}`),
-  listarTotaisAnuais: (ano: number) =>
-    apiRequest<SerieAnualTotais>(`${BASE}/totais-anuais?ano=${ano}`),
+  listarTotaisAnuais: (ano: number, pago?: boolean) => {
+    const params = new URLSearchParams({ ano: String(ano) })
+    if (pago !== undefined) {
+      params.set('pago', String(pago))
+    }
+    return apiRequest<SerieAnualTotais>(`${BASE}/totais-anuais?${params}`)
+  },
+  listarAgregados: (ano: number, mes: number, groupBy: AgrupamentoReceita) =>
+    apiRequest<AgregadosCompetencia>(
+      `${BASE}/agregados?ano=${ano}&mes=${mes}&groupBy=${groupBy}`,
+    ),
   cadastrar: (data: ReceitaRequest) =>
     apiRequest<void>(BASE, { method: 'POST', body: JSON.stringify(data) }),
   atualizar: (id: number, data: ReceitaUpdateRequest) =>

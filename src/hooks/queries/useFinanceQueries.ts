@@ -1,10 +1,13 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 import { ambientesApi } from '../../api/ambientes.api'
+import { balancoApi } from '../../api/balanco.api'
 import { cartoesApi } from '../../api/cartoes.api'
 import { categoriasApi } from '../../api/categorias.api'
 import { despesasApi } from '../../api/despesas.api'
 import { pagadoresApi } from '../../api/pagadores.api'
 import { receitasApi } from '../../api/receitas.api'
+import type { AgrupamentoDespesa, AgrupamentoReceita, AgregadosCompetencia } from '../../types/agregados.types'
+import type { BalancoAnual } from '../../types/balanco.types'
 import type { Despesa } from '../../types/despesa.types'
 import type { ReceitaCompetenciaResponse } from '../../types/receita.types'
 import type { SerieAnualTotais } from '../../types/serieAnual.types'
@@ -86,5 +89,34 @@ export function useReceitasTotaisAnuaisQuery(ano: number) {
   return useQueryWithFeedback<SerieAnualTotais>({
     queryKey: queryKeys.receitas.totaisAnuais(ano),
     queryFn: () => receitasApi.listarTotaisAnuais(ano),
+  })
+}
+
+export function useDespesasAgregadosQuery(
+  ano: number,
+  mes: number,
+  groupBy: AgrupamentoDespesa,
+) {
+  return useQueryWithFeedback<AgregadosCompetencia>({
+    queryKey: queryKeys.despesas.agregados(ano, mes, groupBy),
+    queryFn: () => despesasApi.listarAgregados(ano, mes, groupBy),
+  })
+}
+
+export function useReceitasAgregadosQuery(
+  ano: number,
+  mes: number,
+  groupBy: AgrupamentoReceita,
+) {
+  return useQueryWithFeedback<AgregadosCompetencia>({
+    queryKey: queryKeys.receitas.agregados(ano, mes, groupBy),
+    queryFn: () => receitasApi.listarAgregados(ano, mes, groupBy),
+  })
+}
+
+export function useBalancoSerieAnualQuery(ano: number) {
+  return useQueryWithFeedback<BalancoAnual>({
+    queryKey: queryKeys.balanco.serieAnual(ano),
+    queryFn: () => balancoApi.listarSerieAnual(ano),
   })
 }

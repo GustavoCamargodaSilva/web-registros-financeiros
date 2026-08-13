@@ -181,6 +181,17 @@ export function IconClose(props: IconProps) {
   )
 }
 
+export function IconChart(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M4 19h16" />
+      <path d="M7 16V9" />
+      <path d="M12 16V5" />
+      <path d="M17 16v-4" />
+    </BaseIcon>
+  )
+}
+
 /** Tema claro — exibido quando o tema escuro está ativo */
 export function IconSun(props: IconProps) {
   return (
