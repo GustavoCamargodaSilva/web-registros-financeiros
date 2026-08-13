@@ -10,28 +10,16 @@ import {
 } from 'recharts'
 import { Card } from '../components/ui/Card'
 import { formatCurrency, formatEixoCompacto } from '../utils/format'
-import type { PontoSerieMensalMista, VariacaoTotalAno } from '../utils/homeSerieAnual'
-import {
-  classeDirecaoVariacao,
-  rotuloVariacao,
-} from '../utils/relatoriosComparacoes'
+import type { PontoSerieMensalMista } from '../utils/homeSerieAnual'
 import styles from './HomeSerieAnual.module.css'
 
 interface HomeSerieAnualProps {
   ano: number
   pontos: PontoSerieMensalMista[]
-  variacaoDespesas: VariacaoTotalAno
-  variacaoReceitas?: VariacaoTotalAno
   loading?: boolean
 }
 
-export function HomeSerieAnual({
-  ano,
-  pontos,
-  variacaoDespesas,
-  variacaoReceitas,
-  loading = false,
-}: HomeSerieAnualProps) {
+export function HomeSerieAnual({ ano, pontos, loading = false }: HomeSerieAnualProps) {
   if (loading) {
     return (
       <Card>
@@ -48,20 +36,6 @@ export function HomeSerieAnual({
     <Card>
       <div className={styles.header}>
         <h2 className={styles.sectionTitle}>Evolução {ano}</h2>
-        {variacaoReceitas ? (
-          <p
-            className={`${styles.variacao} ${styles[`variacao_${classeDirecaoVariacao(variacaoReceitas)}`]}`}
-            role="status"
-          >
-            {rotuloVariacao('YoY receitas YTD', variacaoReceitas)}
-          </p>
-        ) : null}
-        <p
-          className={`${styles.variacao} ${styles[`variacao_${classeDirecaoVariacao(variacaoDespesas)}`]}`}
-          role="status"
-        >
-          {rotuloVariacao('YoY despesas YTD', variacaoDespesas)}
-        </p>
       </div>
 
       {semDados ? (

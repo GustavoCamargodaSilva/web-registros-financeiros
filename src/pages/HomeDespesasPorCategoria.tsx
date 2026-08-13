@@ -3,12 +3,7 @@ import { Card } from '../components/ui/Card'
 import { formatCurrency, formatPercent } from '../utils/format'
 import { CATEGORY_COLORS } from '../utils/homeCategoryColors'
 import type { GastoPorCategoria } from '../utils/homeGastosPorCategoria'
-import type { VariacaoTotalAno } from '../utils/homeSerieAnual'
 import { limitarCategoriasParaDonut } from '../utils/limitarCategoriasParaDonut'
-import {
-  classeDirecaoVariacao,
-  rotuloVariacao,
-} from '../utils/relatoriosComparacoes'
 import styles from './HomeDespesasPorCategoria.module.css'
 
 const LABEL_MIN_PERCENT = 0.05
@@ -54,12 +49,8 @@ function renderPercentLabel({
   )
 }
 
-export interface CategoriaHomeItem extends GastoPorCategoria {
-  mom?: VariacaoTotalAno
-}
-
 interface HomeDespesasPorCategoriaProps {
-  itens: CategoriaHomeItem[]
+  itens: GastoPorCategoria[]
 }
 
 export function HomeDespesasPorCategoria({ itens }: HomeDespesasPorCategoriaProps) {
@@ -124,17 +115,7 @@ export function HomeDespesasPorCategoria({ itens }: HomeDespesasPorCategoriaProp
                   <span className={styles.swatch} style={{ background: item.fill }} />
                   <div className={styles.legendText}>
                     <span className={styles.legendName}>{item.nome}</span>
-                    <span className={styles.legendMeta}>
-                      {formatPercent(item.percentual)}
-                      {item.mom ? (
-                        <>
-                          {' · '}
-                          <span className={styles[`hint_${classeDirecaoVariacao(item.mom)}`]}>
-                            {rotuloVariacao('MoM', item.mom)}
-                          </span>
-                        </>
-                      ) : null}
-                    </span>
+                    <span className={styles.legendMeta}>{formatPercent(item.percentual)}</span>
                   </div>
                 </li>
               ))}
