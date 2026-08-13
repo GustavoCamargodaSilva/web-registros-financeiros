@@ -11,6 +11,7 @@ export interface PontoSerieMensalMista {
   label: string
   receitas: number
   despesas: number
+  saldo: number
 }
 
 export interface VariacaoTotalAno {
@@ -87,11 +88,14 @@ export function montarPontosSerieMista(
 
   return Array.from({ length: mesLimite }, (_, i) => {
     const mes = i + 1
+    const receitas = mapaReceitas.get(mes) ?? 0
+    const despesas = mapaDespesas.get(mes) ?? 0
     return {
       mes,
       label: MESES_LABEL[mes - 1] ?? String(mes),
-      receitas: mapaReceitas.get(mes) ?? 0,
-      despesas: mapaDespesas.get(mes) ?? 0,
+      receitas,
+      despesas,
+      saldo: receitas - despesas,
     }
   })
 }

@@ -25,6 +25,13 @@
   color: var(--color-text-muted);
 }
 
+.metricHint {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
 .skeletonChart {
   width: 100%;
   height: 160px;
