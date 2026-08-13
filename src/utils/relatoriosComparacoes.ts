@@ -1,6 +1,7 @@
 import type { AgregadoItem } from '../types/agregados.types'
 import type { Despesa } from '../types/despesa.types'
 import type { Receita } from '../types/receita.types'
+import { formatCurrency, formatPercent } from './format'
 import { calcularVariacaoTotalAno, type VariacaoTotalAno } from './homeSerieAnual'
 
 export interface CompetenciaRef {
@@ -88,4 +89,29 @@ export function listarReceitasPendentes(receitas: Receita[]): Receita[] {
   return [...receitas]
     .filter((item) => !item.pago)
     .sort((a, b) => a.dataPagamento.localeCompare(b.dataPagamento))
+}
+
+export function rotuloVariacao(prefixo: string, variacao: VariacaoTotalAno): string {
+  const abs = formatCurrency(Math.abs(variacao.delta))
+  const pct =
+    variacao.percentual == null ? null : formatPercent(Math.abs(variacao.percentual))
+
+  switch (variacao.direcao) {
+    case 'alta':
+      return pct ? `${prefixo} +${abs} (${pct})` : `${prefixo} +${abs}`
+    case 'baixa':
+      return pct ? `${prefixo} −${abs} (${pct})` : `${prefixo} −${abs}`
+    case 'estavel':
+      return `${prefixo} estável`
+    case 'indefinida':
+      return `${prefixo} sem base anterior`
+  }
+}
+
+export function classeDirecaoVariacao(
+  variacao: VariacaoTotalAno,
+): 'alta' | 'baixa' | 'neutra' {
+  if (variacao.direcao === 'alta') return 'alta'
+  if (variacao.direcao === 'baixa') return 'baixa'
+  return 'neutra'
 }

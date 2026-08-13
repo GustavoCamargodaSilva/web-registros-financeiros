@@ -28,9 +28,6 @@ const DespesasPage = lazy(() =>
 const HomePage = lazy(() =>
   import('./pages/HomePage').then((module) => ({ default: module.HomePage })),
 )
-const RelatoriosPage = lazy(() =>
-  import('./pages/RelatoriosPage').then((module) => ({ default: module.RelatoriosPage })),
-)
 const PagadoresPage = lazy(() =>
   import('./pages/PagadoresPage').then((module) => ({ default: module.PagadoresPage })),
 )
@@ -49,7 +46,6 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route index element={<Navigate to="/home" replace />} />
             <Route path="home" element={<HomePage />} />
-            <Route path="relatorios" element={<RelatoriosPage />} />
             <Route path="despesas" element={<DespesasPage />} />
             <Route path="receitas" element={<ReceitasPage />} />
             <Route path="categorias" element={<CategoriasPage />} />

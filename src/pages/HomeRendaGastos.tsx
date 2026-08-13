@@ -2,13 +2,28 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { Card } from '../components/ui/Card'
 import { formatCurrency, formatPercentFixed2 } from '../utils/format'
 import type { BalancoMes } from '../utils/homeBalanco'
+import type { VariacaoTotalAno } from '../utils/homeSerieAnual'
+import {
+  classeDirecaoVariacao,
+  rotuloVariacao,
+} from '../utils/relatoriosComparacoes'
 import styles from './HomeRendaGastos.module.css'
 
 interface HomeRendaGastosProps {
   balanco: BalancoMes
+  momRenda?: VariacaoTotalAno
+  momGastos?: VariacaoTotalAno
+  momDisponivel?: VariacaoTotalAno
+  yoySaldoMes?: VariacaoTotalAno
 }
 
-export function HomeRendaGastos({ balanco }: HomeRendaGastosProps) {
+export function HomeRendaGastos({
+  balanco,
+  momRenda,
+  momGastos,
+  momDisponivel,
+  yoySaldoMes,
+}: HomeRendaGastosProps) {
   const semLancamentos = balanco.totalEntradas === 0 && balanco.totalSaidas === 0
 
   const disponivelNoGrafico = Math.max(balanco.disponivel, 0)
@@ -80,24 +95,57 @@ export function HomeRendaGastos({ balanco }: HomeRendaGastosProps) {
             </div>
           </div>
 
-          <dl className={styles.metrics}>
-            <div className={styles.metricRow}>
-              <dt>
-                <span className={styles.swatch} style={{ background: 'var(--color-danger)' }} />
-                Gastos
-              </dt>
-              <dd>{formatCurrency(balanco.totalSaidas)}</dd>
-            </div>
-            <div className={styles.metricRow}>
-              <dt>
-                <span className={styles.swatch} style={{ background: 'var(--color-success)' }} />
-                Disponível
-              </dt>
-              <dd className={balanco.disponivel < 0 ? styles.metricNegativo : undefined}>
-                {formatCurrency(balanco.disponivel)}
-              </dd>
-            </div>
-          </dl>
+          <div className={styles.side}>
+            <dl className={styles.metrics}>
+              <div className={styles.metricRow}>
+                <dt>
+                  <span className={styles.swatch} style={{ background: 'var(--color-success)' }} />
+                  Renda
+                </dt>
+                <dd>{formatCurrency(balanco.totalEntradas)}</dd>
+              </div>
+              <div className={styles.metricRow}>
+                <dt>
+                  <span className={styles.swatch} style={{ background: 'var(--color-danger)' }} />
+                  Gastos
+                </dt>
+                <dd>{formatCurrency(balanco.totalSaidas)}</dd>
+              </div>
+              <div className={styles.metricRow}>
+                <dt>
+                  <span className={styles.swatch} style={{ background: 'var(--color-success)' }} />
+                  Disponível
+                </dt>
+                <dd className={balanco.disponivel < 0 ? styles.metricNegativo : undefined}>
+                  {formatCurrency(balanco.disponivel)}
+                </dd>
+              </div>
+            </dl>
+            {momRenda ? (
+              <p className={`${styles.hint} ${styles[`hint_${classeDirecaoVariacao(momRenda)}`]}`}>
+                {rotuloVariacao('MoM renda', momRenda)}
+              </p>
+            ) : null}
+            {momGastos ? (
+              <p className={`${styles.hint} ${styles[`hint_${classeDirecaoVariacao(momGastos)}`]}`}>
+                {rotuloVariacao('MoM gastos', momGastos)}
+              </p>
+            ) : null}
+            {momDisponivel ? (
+              <p
+                className={`${styles.hint} ${styles[`hint_${classeDirecaoVariacao(momDisponivel)}`]}`}
+              >
+                {rotuloVariacao('MoM disponível', momDisponivel)}
+              </p>
+            ) : null}
+            {yoySaldoMes ? (
+              <p
+                className={`${styles.hint} ${styles[`hint_${classeDirecaoVariacao(yoySaldoMes)}`]}`}
+              >
+                {rotuloVariacao('YoY saldo do mês', yoySaldoMes)}
+              </p>
+            ) : null}
+          </div>
         </div>
       )}
     </Card>

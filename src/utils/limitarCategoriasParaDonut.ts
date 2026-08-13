@@ -5,10 +5,10 @@ const DEMAIS_ID = -1
 /**
  * Mantém no máximo `maxFatias` itens no donut: top (max-1) + "Demais…" se sobrar.
  */
-export function limitarCategoriasParaDonut(
-  itens: GastoPorCategoria[],
+export function limitarCategoriasParaDonut<T extends GastoPorCategoria>(
+  itens: T[],
   maxFatias = 5,
-): GastoPorCategoria[] {
+): Array<T | GastoPorCategoria> {
   if (itens.length <= maxFatias) {
     return itens
   }

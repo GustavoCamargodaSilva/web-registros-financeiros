@@ -1,9 +1,14 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { Card } from '../components/ui/Card'
-import { formatCurrency } from '../utils/format'
+import { formatCurrency, formatPercent } from '../utils/format'
 import { CATEGORY_COLORS } from '../utils/homeCategoryColors'
 import type { GastoPorCategoria } from '../utils/homeGastosPorCategoria'
+import type { VariacaoTotalAno } from '../utils/homeSerieAnual'
 import { limitarCategoriasParaDonut } from '../utils/limitarCategoriasParaDonut'
+import {
+  classeDirecaoVariacao,
+  rotuloVariacao,
+} from '../utils/relatoriosComparacoes'
 import styles from './HomeDespesasPorCategoria.module.css'
 
 const LABEL_MIN_PERCENT = 0.05
@@ -49,8 +54,12 @@ function renderPercentLabel({
   )
 }
 
+export interface CategoriaHomeItem extends GastoPorCategoria {
+  mom?: VariacaoTotalAno
+}
+
 interface HomeDespesasPorCategoriaProps {
-  itens: GastoPorCategoria[]
+  itens: CategoriaHomeItem[]
 }
 
 export function HomeDespesasPorCategoria({ itens }: HomeDespesasPorCategoriaProps) {
@@ -113,7 +122,20 @@ export function HomeDespesasPorCategoria({ itens }: HomeDespesasPorCategoriaProp
                   title={`${item.nome}: ${formatCurrency(item.total)} (${item.percentual.toFixed(1)}%)`}
                 >
                   <span className={styles.swatch} style={{ background: item.fill }} />
-                  <span className={styles.legendName}>{item.nome}</span>
+                  <div className={styles.legendText}>
+                    <span className={styles.legendName}>{item.nome}</span>
+                    <span className={styles.legendMeta}>
+                      {formatPercent(item.percentual)}
+                      {item.mom ? (
+                        <>
+                          {' · '}
+                          <span className={styles[`hint_${classeDirecaoVariacao(item.mom)}`]}>
+                            {rotuloVariacao('MoM', item.mom)}
+                          </span>
+                        </>
+                      ) : null}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
