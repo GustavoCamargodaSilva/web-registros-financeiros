@@ -8,7 +8,7 @@ const DEMAIS_ID = -1
 export function limitarCategoriasParaDonut<T extends GastoPorCategoria>(
   itens: T[],
   maxFatias = 5,
-): Array<T | GastoPorCategoria> {
+): T[] {
   if (itens.length <= maxFatias) {
     return itens
   }
@@ -26,6 +26,6 @@ export function limitarCategoriasParaDonut<T extends GastoPorCategoria>(
       nome: 'Demais…',
       total: totalDemais,
       percentual: totalGeral > 0 ? (totalDemais / totalGeral) * 100 : 0,
-    },
+    } as T,
   ]
 }
