@@ -31,6 +31,8 @@ export function useInvalidateFinanceQueries() {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: queryKeys.despesas.competencia(ano, mes) }),
           queryClient.invalidateQueries({ queryKey: queryKeys.despesas.totaisAnuais(ano) }),
+          queryClient.invalidateQueries({ queryKey: ['despesas', 'agregados'] }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.balanco.serieAnual(ano) }),
         ])
       },
       [queryClient],
@@ -40,6 +42,8 @@ export function useInvalidateFinanceQueries() {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: queryKeys.receitas.competencia(ano, mes) }),
           queryClient.invalidateQueries({ queryKey: queryKeys.receitas.totaisAnuais(ano) }),
+          queryClient.invalidateQueries({ queryKey: ['receitas', 'agregados'] }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.balanco.serieAnual(ano) }),
         ])
       },
       [queryClient],

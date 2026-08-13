@@ -4,6 +4,7 @@ import { useAmbientePermissoes } from '../../hooks/useAmbientePermissoes'
 import {
   IconBank,
   IconCaret,
+  IconChart,
   IconHome,
   IconList,
   IconMail,
@@ -27,7 +28,10 @@ interface MenuGroup {
   children: MenuChild[]
 }
 
-const topLinks: MenuChild[] = [{ to: '/home', label: 'Home', icon: <IconHome /> }]
+const topLinks: MenuChild[] = [
+  { to: '/home', label: 'Home', icon: <IconHome /> },
+  { to: '/relatorios', label: 'Relatórios', icon: <IconChart /> },
+]
 
 const baseMenuGroups: MenuGroup[] = [
   {
