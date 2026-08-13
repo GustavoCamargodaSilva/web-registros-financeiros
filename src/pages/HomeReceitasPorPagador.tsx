@@ -1,14 +1,10 @@
 import { Card } from '../components/ui/Card'
 import { formatCurrency, formatPercent } from '../utils/format'
-import type { ItemComMoM } from '../utils/relatoriosComparacoes'
-import {
-  classeDirecaoVariacao,
-  rotuloVariacao,
-} from '../utils/relatoriosComparacoes'
+import type { AgregadoItem } from '../types/agregados.types'
 import styles from './HomeRanking.module.css'
 
 interface HomeReceitasPorPagadorProps {
-  itens: ItemComMoM[]
+  itens: AgregadoItem[]
 }
 
 export function HomeReceitasPorPagador({ itens }: HomeReceitasPorPagadorProps) {
@@ -23,12 +19,7 @@ export function HomeReceitasPorPagador({ itens }: HomeReceitasPorPagadorProps) {
             <li key={`${item.id}-${item.chave}`} className={styles.rankingItem}>
               <span className={styles.nome}>{item.chave}</span>
               <strong>{formatCurrency(item.total)}</strong>
-              <span className={styles.meta}>
-                {formatPercent(item.percentual)} ·{' '}
-                <span className={styles[`hint_${classeDirecaoVariacao(item.mom)}`]}>
-                  {rotuloVariacao('MoM', item.mom)}
-                </span>
-              </span>
+              <span className={styles.meta}>{formatPercent(item.percentual)}</span>
             </li>
           ))}
         </ul>

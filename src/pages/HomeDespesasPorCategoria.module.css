@@ -106,15 +106,3 @@
   font-size: 12px;
   color: var(--color-text-muted);
 }
-
-.hint_alta {
-  color: var(--color-danger);
-}
-
-.hint_baixa {
-  color: var(--color-success);
-}
-
-.hint_neutra {
-  color: var(--color-text-muted);
-}
